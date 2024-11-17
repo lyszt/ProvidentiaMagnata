@@ -1,22 +1,28 @@
-# This example requires the 'message_content' intent.
-
+# Application Imports
 import discord
+# Util Imports
+import logging
+# Running imports
+import os
+from dotenv import load_dotenv
 
+
+# GLOBALS
+ENV = "Config/providence.env"
+load_dotenv(ENV)
 intents = discord.Intents.default()
 intents.message_content = True
 
+load_dotenv()
 client = discord.Client(intents=intents)
 
 @client.event
 async def on_ready():
-    print(f'We have logged in as {client.user}')
+    print(f'Initialized as {client.user}.')
 
 @client.event
 async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content.startswith('$hello'):
-        await message.channel.send('Hello!')
-
-client.run('your token here')
+client.run(os.getenv('DISCORD_TOKEN'))
