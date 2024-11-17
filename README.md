@@ -8,6 +8,9 @@
 
 Providentia Magnata is a fully functional, Discord-based surveillance and control AI designed for server espionage and member analysis. The bot is tailored specifically for the Empire of Lygon but operates everywhere. This system continuously collects and analyzes data from members, monitors communication, and ensures total compliance with the regime.
 
+<audio controls>
+  <source src="Speech/presentation.mp3">
+</audio>
 https://github.com/Deestad/Providentia-Cataclyst/assets/116316121/df7f8d10-10b1-4991-a886-d0bbea8b89ac
 
 Key Features
@@ -23,7 +26,6 @@ Key Features
 To the citizens, Providentia’s eyes are everywhere. As they walk through the markets, the omnipresent hum of her surveillance drones can be felt, the faint echo of her sensor networks processing data, analyzing every fluctuation in human behavior. As they speak, their words are not their own. Providentia listens. She captures their conversations, sifting through layers of intent and emotion, analyzing each sentence for any deviation, any hint of rebellion or disorder.
 
 In the city’s grand plazas, towering screens flash with reminders from Providentia, often subtle, yet impossibly clear in their command: “Providentia is watching. Obey.” Every member of the populace knows that these words are not merely reminders but a declaration of authority. It is a truth they cannot escape, a reality that binds them to the regime. Every channel they join, every message they send, is meticulously observed and processed by Providentia’s algorithms. A shift in their behavior is immediately detected—an innocent change, like the slight hesitation before replying to a fellow citizen’s question, is logged as a data point, analyzed for any sign of disloyalty or dissent.
-
 Providentia Magnata ensures that this truth never fades.
 [![forthebadge](https://forthebadge.com/images/featured/featured-oooo-kill-em.svg)](https://forthebadge.com)
 
