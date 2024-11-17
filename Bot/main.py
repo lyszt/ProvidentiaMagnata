@@ -4,7 +4,7 @@ import discord
 
 # Util Imports
 import logging
-import datetime
+from datetime import datetime
 
 # Running imports
 import os
@@ -19,12 +19,11 @@ load_dotenv(ENV)
 intents = discord.Intents.default()
 intents.message_content = True
 
-load_dotenv()
 client = discord.Client(intents=intents)
 
 @client.event
 async def on_ready():
-    logging.info(f"Providence initialized at {datetime.datetime.now()}")
+    logging.info(f"Providence initialized at {datetime.now()}")
 @client.event
 async def on_message(message):
     if message.author == client.user:
