@@ -3,7 +3,7 @@ import os
 
 class Initialize:
     def __init__(self):
-        pass
+        self.makeTemp()
     def makeLogs(self):
         LOG_FILE = 'providence.log'
         if os.path.isfile(LOG_FILE) and os.access(LOG_FILE, os.R_OK):
@@ -18,3 +18,16 @@ class Initialize:
         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
         console.setFormatter(formatter)
         logging.getLogger('').addHandler(console)
+
+    def makeTemp(self):
+        TEMP = "temp"
+        if os.path.exists(TEMP) and os.path.isdir(TEMP):
+            for filename in os.listdir(TEMP):
+                file_path = os.path.join(TEMP, filename)
+                os.remove(file_path)
+        else:
+            try:
+                original_umask = os.umask(0)
+                os.makedirs('temp', 0o777)  # Use octal notation
+            finally:
+                os.umask(original_umask)

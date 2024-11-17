@@ -2,6 +2,11 @@
 
 import discord
 
+# Databases
+import peewee
+from peewee import Model, CharField, SqliteDatabase
+import sqlite3
+
 # Util Imports
 import logging
 from datetime import datetime
@@ -15,6 +20,8 @@ from Modules.configuration import *
 
 # GLOBALS
 ENV = "Config/providence.env"
+GLOBAL_MEMORY = "Data/global.db"
+USER_DATA = "Data/users.db"
 load_dotenv(ENV)
 intents = discord.Intents.default()
 intents.message_content = True
