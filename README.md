@@ -28,6 +28,10 @@
 
 ---
 
+
+https://github.com/user-attachments/assets/cdb683ca-7e12-4cd3-8239-6d452262f2a0
+
+
 [![forthebadge](https://forthebadge.com/images/featured/featured-oooo-kill-em.svg)](https://forthebadge.com)
 
 ### The Providence
@@ -46,7 +50,6 @@ Every member of the populace knows that these words are not merely reminders, bu
 
 We welcome contributions from the community to further enhance Providentia's capabilities.
 
-![2B from Nier](https://i.pinimg.com/originals/c6/0d/f7/c60df776f80890880aa5b73e73f084f2.gif)
 
 ---
 
