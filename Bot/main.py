@@ -1,11 +1,17 @@
 # Application Imports
+
 import discord
+
 # Util Imports
 import logging
+import datetime
+
 # Running imports
 import os
 from dotenv import load_dotenv
 
+# Modules
+from Modules.configuration import *
 
 # GLOBALS
 ENV = "Config/providence.env"
@@ -18,11 +24,14 @@ client = discord.Client(intents=intents)
 
 @client.event
 async def on_ready():
-    print(f'Initialized as {client.user}.')
-
+    logging.info(f"Providence initialized at {datetime.datetime.now()}")
 @client.event
 async def on_message(message):
     if message.author == client.user:
         return
 
-client.run(os.getenv('DISCORD_TOKEN'))
+
+if __name__ == '__main__':
+    Initialize().makeLogs()
+    logging.info("Logger initialized.")
+    client.run(os.getenv('TOKEN'))
