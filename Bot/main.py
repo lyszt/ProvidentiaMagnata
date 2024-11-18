@@ -26,6 +26,13 @@ load_dotenv(ENV)
 intents = discord.Intents.default()
 intents.message_content = True
 
+Databases = {
+    "DB_users": SqliteDatabase("Data/users.db"),
+    "DB_global": SqliteDatabase("Data/global.db"),
+    "config" : SqliteDatabase("Data/config.db")
+}
+
+
 client = discord.Client(intents=intents)
 
 @client.event
@@ -39,5 +46,8 @@ async def on_message(message):
 
 if __name__ == '__main__':
     Initialize().makeLogs()
+    for base in Databases:
+        Initialize().makeDatabases(base)
     logging.info("Logger initialized.")
     client.run(os.getenv('TOKEN'))
+

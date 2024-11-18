@@ -1,6 +1,8 @@
 import logging
 import os
-
+import peewee
+import sqlite3
+import logging
 class Initialize:
     def __init__(self):
         self.makeTemp()
@@ -31,3 +33,18 @@ class Initialize:
                 os.makedirs('temp', 0o777)  # Use octal notation
             finally:
                 os.umask(original_umask)
+    def makeDatabases(self,db):
+        try:
+            db.connect()
+        except peewee.OperationalError as e:
+            # If the connection is already open, ignore the exception
+            if 'Connection already opened' not in str(e):
+                logging.error(e)
+
+        db.create_tables([Whitelist, Censura], safe=True)
+
+    def terminateDatabases(self,db):
+        def termination():
+            logging.info(f"Initiation of termination procedures. \n")
+            db.close()
+            logging.info("Termination succeeded.")
