@@ -44,7 +44,7 @@ class Initialize:
                 os.umask(original_umask)
 
     # DATABASES
-    def makeUser(self,db):
+    def makeUser(self):
         db = SqliteDatabase("Data/users.db")
         try:
             db.connect()
