@@ -3,9 +3,18 @@ import os
 import peewee
 import sqlite3
 import logging
+# ==============================================================
+
+# IMPORTANT - THIS IMPORTS THE DATABASE MODELS LOCATED IN DATABASE_MODELS.PY
+from Data.database_models import *
+
+#=============================================
+
 class Initialize:
     def __init__(self):
-        self.makeTemp()
+        pass
+
+    # TEMPORARY FILES
     def makeLogs(self):
         LOG_FILE = 'providence.log'
         if os.path.isfile(LOG_FILE) and os.access(LOG_FILE, os.R_OK):
@@ -33,7 +42,10 @@ class Initialize:
                 os.makedirs('temp', 0o777)  # Use octal notation
             finally:
                 os.umask(original_umask)
-    def makeDatabases(self,db):
+
+    # DATABASES
+    def makeUser(self,db):
+        db = SqliteDatabase("Data/users.db")
         try:
             db.connect()
         except peewee.OperationalError as e:
@@ -41,7 +53,8 @@ class Initialize:
             if 'Connection already opened' not in str(e):
                 logging.error(e)
 
-        db.create_tables([Whitelist, Censura], safe=True)
+        db_user = [Profiles,Messages,MessageTopics,UserActivity,UserPreferences]
+        db.create_tables([item for item in db_user], safe=True)
 
     def terminateDatabases(self,db):
         def termination():

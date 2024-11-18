@@ -1,6 +1,10 @@
 # Application Imports
 
 import discord
+from discord.app_commands import Choice
+from discord.ext import commands
+from discord.ext.commands import Bot
+from discord.ext import tasks
 
 # Databases
 import peewee
@@ -27,7 +31,6 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 Databases = {
-    "DB_users": SqliteDatabase("Data/users.db"),
     "DB_global": SqliteDatabase("Data/global.db"),
     "config" : SqliteDatabase("Data/config.db")
 }
@@ -46,8 +49,8 @@ async def on_message(message):
 
 if __name__ == '__main__':
     Initialize().makeLogs()
-    for base in Databases:
-        Initialize().makeDatabases(base)
+    Initialize().makeTemp()
+    Initialize().makeUser()
     logging.info("Logger initialized.")
     client.run(os.getenv('TOKEN'))
 

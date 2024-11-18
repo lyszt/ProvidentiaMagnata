@@ -1,5 +1,5 @@
 import sqlite3
-import peewee
+from peewee import Model, CharField, SqliteDatabase
 import logging
 import inspect
 
