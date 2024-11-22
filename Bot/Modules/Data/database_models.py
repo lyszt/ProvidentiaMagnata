@@ -31,6 +31,7 @@ class Messages(Model):
     sentiment_score = IntegerField(null=True)  # Sentiment score for the message
     message_type = CharField(default='text')  # Type of message (e.g., text, image, link)
     channel_id = CharField(null=True)  # The channel the message was sent in (optional)
+    guild_id = CharField(null=True)  # The channel the message was sent in (optional)
 
     class Meta:
         database = db  # Specify the database connection to use

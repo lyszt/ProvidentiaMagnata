@@ -51,9 +51,10 @@ async def on_message(interaction):
 
     # Lygon e Grão-Ducado Czéliano
     if interaction.guild.id == 704066892972949504 or interaction.guild.id == 696830110493573190:
+        user_profile = Profiles.get_or_none(user_id = interaction.author.id)
         # Extract relevant user detailsS
         user_details = {
-            'user_id': str(interaction.author.id),  # Unique Discord user ID
+            'userid': str(interaction.author.id),  # Unique Discord user ID
             'username': interaction.author.name,  # Discord username (e.g., 'username')
             'discriminator': interaction.author.discriminator,  # 4-digit discriminator (e.g., '1234')
             'avatar_url': str(interaction.author.avatar) if interaction.author.avatar else None,
@@ -61,13 +62,23 @@ async def on_message(interaction):
             'user_status': str(interaction.author.status),  # User's current status: 'online', 'offline', 'idle', 'dnd'
             'last_seen': interaction.author.activity.start if interaction.author.activity else None,
             # Last activity timestamp, if any
-            'joined_at': interaction.author.created_at,  # Timestamp of when the user joined
+            'joined_at': interaction.author.joined_at,  # Timestamp of when the user joined
             'is_bot': interaction.author.bot,  # Whether the user is a bot
             'bio': None  # No bio data is directly available from Discord API
         }
         create_or_update_user_profile(user_details)
 
-
+        message_analysis = analyse_message(interaction.text)
+        message_details = {
+            'user': user_profile,
+            'message_text': interaction.text,
+            'sentiment_score': message_analysis['sentiment_score'],
+            'subjectivity': message_analysis['message_type'],
+            'timestamp': interaction.created_at,
+            'guild_id': interaction.guild.id,
+            'channel_id': interaction.channel.id,
+        }
+        create_or_update_message_details(message_details)
 
 @atexit.register
 def killDatabases():

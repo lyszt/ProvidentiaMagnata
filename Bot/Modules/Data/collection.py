@@ -45,6 +45,42 @@ def create_or_update_user_profile(user_data: dict):
         user_profile.save()
     db.close()
 
+def create_or_update_message_details(message_details: dict):
+    logging.info(f"[ Processing message from user: {message_details['user'].username}, Guild: {message_details['guild_id']} ]")
+    db = SqliteDatabase("/home/aluno/PycharmProjects/ProvidentiaMagnata/Bot/Data/users.db")
+    db.connect()
+
+    # Unpack message details from the dictionary
+    user_profile = message_details.get('user')
+    message_text = message_details.get('message_text')
+    sentiment_score = message_details.get('sentiment_score')
+    subjectivity = message_details.get('subjectivity')
+    timestamp = message_details.get('timestamp')
+    guild_id = message_details.get('guild_id')
+    channel_id = message_details.get('channel_id')
+
+    # Create or update message record in the database
+    message_record, created = Messages.get_or_create(
+        timestamp=timestamp,
+        guild_id=guild_id,
+        channel_id=channel_id,
+        user=user_profile,  # Assuming foreign key relationship
+        defaults={
+            'message_text': message_text,
+            'sentiment_score': sentiment_score,
+            'subjectivity': subjectivity,
+            'created_at': datetime.now(),
+        }
+    )
+
+    # Update message fields if the message already exists (not created)
+    if not created:
+        message_record.message_text = message_text
+        message_record.sentiment_score = sentiment_score
+        message_record.subjectivity = subjectivity
+        message_record.save()
+
+    db.close()
 class UserCollect:
     def __init__(self):
         pass
