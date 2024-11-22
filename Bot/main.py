@@ -1,22 +1,14 @@
 # Application Imports
+import glob
 
 import discord
-from discord.app_commands import Choice
-from discord.ext import commands
-from discord.ext.commands import Bot
-from discord.ext import tasks
 
 # Databases
-import peewee
-from peewee import Model, CharField, SqliteDatabase
-import sqlite3
 
 # Util Imports
-import logging
-from datetime import datetime
+import atexit
 
 # Running imports
-import os
 from dotenv import load_dotenv
 
 # Modules
@@ -29,11 +21,6 @@ USER_DATA = "Data/users.db"
 load_dotenv(ENV)
 intents = discord.Intents.default()
 intents.message_content = True
-
-Databases = {
-    "DB_global": SqliteDatabase("Data/global.db"),
-    "config" : SqliteDatabase("Data/config.db")
-}
 
 
 client = discord.Client(intents=intents)
@@ -58,15 +45,17 @@ async def on_ready():
 async def on_message(interaction):
     if interaction.author == client.user:
         return
-    if(interaction.user.bot):
+    if(interaction.author.bot):
         return
-    if(interaction.channel.id == 704066892972949504):
+
+    # Lygon e Grão-Ducado Czéliano
+    if interaction.guild.id == 704066892972949504 or interaction.guild.id == 696830110493573190:
         # Extract relevant user detailsS
         user_details = {
             'user_id': str(interaction.author.id),  # Unique Discord user ID
             'username': interaction.author.name,  # Discord username (e.g., 'username')
             'discriminator': interaction.author.discriminator,  # 4-digit discriminator (e.g., '1234')
-            'avatar_url': str(interaction.author.avatar_url) if interaction.author.avatar else None,
+            'avatar_url': str(interaction.author.avatar) if interaction.author.avatar else None,
             # Avatar URL (if available)
             'user_status': str(interaction.author.status),  # User's current status: 'online', 'offline', 'idle', 'dnd'
             'last_seen': interaction.author.activity.start if interaction.author.activity else None,
@@ -75,12 +64,18 @@ async def on_message(interaction):
             'is_bot': interaction.author.bot,  # Whether the user is a bot
             'bio': None  # No bio data is directly available from Discord API
         }
-        UserCollect().create_or_update_user_profile(user_details)
+        create_or_update_user_profile(user_details)
 
 
 
-
-
+@atexit.register
+def killDatabases():
+    logging.info("Killing databases...")
+    for db_file in glob.glob("Bot/Data/**/*.db", recursive=True):
+        db = SqliteDatabase(db_file)
+        if not db.is_closed():
+            db.close()
+            logging.info(f"Closed database: {db_file}")
 
 
 

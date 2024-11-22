@@ -6,7 +6,7 @@ import logging
 # ==============================================================
 
 # IMPORTANT - THIS IMPORTS THE DATABASE MODELS LOCATED IN DATABASE_MODELS.PY
-from Data.database_models import *
+from .Data.database_models import *
 
 #=============================================
 

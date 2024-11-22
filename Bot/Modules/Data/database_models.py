@@ -1,7 +1,7 @@
 from peewee import Model, CharField, SqliteDatabase, DateTimeField, BooleanField, TextField, IntegerField, \
     ForeignKeyField
 
-db = SqliteDatabase("../../Data/users.db")
+db = SqliteDatabase("/home/aluno/PycharmProjects/ProvidentiaMagnata/Bot/Data/users.db")
 
 # USER PROFILING
 
