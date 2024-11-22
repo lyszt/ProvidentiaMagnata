@@ -72,8 +72,8 @@ async def on_message(interaction):
         message_details = {
             'user': user_profile,
             'message_text': interaction.content,
-            'sentiment_score': int(message_analysis['sentiment_score'][0] * 100),
-            'subjectivity': int(message_analysis['subjectivity'][1] * 100),
+            'sentiment_score': message_analysis['sentiment_score'][0] * 100,
+            'subjectivity': message_analysis['sentiment_score'][1] * 100,
             'timestamp': interaction.created_at,
             'guild_id': interaction.guild.id,
             'channel_id': interaction.channel.id,
