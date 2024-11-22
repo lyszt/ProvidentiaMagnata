@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 # Modules
 from Modules.configuration import *
 from Modules.Data.collection import *
+from Modules.Data.message_analysis import *
 # GLOBALS
 ENV = "Config/providence.env"
 GLOBAL_MEMORY = "Data/global.db"

@@ -16,6 +16,7 @@ class Profiles(Model):
     is_bot = BooleanField(default=False)  # Whether the user is a bot
     bio = TextField(null=True)  # Optional user bio or interests
     sentiment_score = IntegerField(default=0)  # Overall sentiment score for the user
+    threat_level = IntegerField(default=0)  # Threat level for banning purposes
     last_interaction = DateTimeField(null=True)  # Last time the user interacted
     created_at = DateTimeField()  # When the profile was created
 

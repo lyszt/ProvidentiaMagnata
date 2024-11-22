@@ -4,7 +4,7 @@ from .database_models import *
 
 
 def create_or_update_user_profile(user_data: dict):
-    logging.info("[...]")
+    logging.info(f"[ Analyzing message of civilizan n°{user_data.get('discriminator')} ]")
     db = SqliteDatabase("/home/aluno/PycharmProjects/ProvidentiaMagnata/Bot/Data/users.db")
     db.connect()
     # Unpack user data from the dictionary
@@ -43,7 +43,6 @@ def create_or_update_user_profile(user_data: dict):
         user_profile.is_bot = is_bot
         user_profile.bio = bio
         user_profile.save()
-        logging.info("Added user to the great database.")
     db.close()
 
 class UserCollect:
