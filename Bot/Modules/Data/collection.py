@@ -46,7 +46,7 @@ def create_or_update_user_profile(user_data: dict):
     db.close()
 
 def create_or_update_message_details(message_details: dict):
-    logging.info(f"[ Processing message from user: {message_details['user'].username}, Guild: {message_details['guild_id']} ]")
+    logging.info(f"[ Processing message from user at Guild: {message_details['guild_id']} ]")
     db = SqliteDatabase("/home/aluno/PycharmProjects/ProvidentiaMagnata/Bot/Data/users.db")
     db.connect()
 
@@ -64,7 +64,7 @@ def create_or_update_message_details(message_details: dict):
         timestamp=timestamp,
         guild_id=guild_id,
         channel_id=channel_id,
-        user=user_profile,  # Assuming foreign key relationship
+        user=user_profile,  # Foreign Key
         defaults={
             'message_text': message_text,
             'sentiment_score': sentiment_score,

@@ -29,6 +29,7 @@ class Messages(Model):
     message_text = TextField()  # The content of the message
     timestamp = DateTimeField()  # Timestamp of when the message was sent
     sentiment_score = IntegerField(null=True)  # Sentiment score for the message
+    subjectivity = IntegerField(null=True)  # Sentiment score for the message
     message_type = CharField(default='text')  # Type of message (e.g., text, image, link)
     channel_id = CharField(null=True)  # The channel the message was sent in (optional)
     guild_id = CharField(null=True)  # The channel the message was sent in (optional)

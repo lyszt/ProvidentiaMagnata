@@ -51,10 +51,10 @@ async def on_message(interaction):
 
     # Lygon e Grão-Ducado Czéliano
     if interaction.guild.id == 704066892972949504 or interaction.guild.id == 696830110493573190:
-        user_profile = Profiles.get_or_none(user_id = interaction.author.id)
+        user_profile = Profiles.get_or_none(userid = interaction.author.id)
         # Extract relevant user detailsS
         user_details = {
-            'userid': str(interaction.author.id),  # Unique Discord user ID
+            'user_id': str(interaction.author.id),  # Unique Discord user ID
             'username': interaction.author.name,  # Discord username (e.g., 'username')
             'discriminator': interaction.author.discriminator,  # 4-digit discriminator (e.g., '1234')
             'avatar_url': str(interaction.author.avatar) if interaction.author.avatar else None,
@@ -68,12 +68,12 @@ async def on_message(interaction):
         }
         create_or_update_user_profile(user_details)
 
-        message_analysis = analyse_message(interaction.text)
+        message_analysis = analyse_message(interaction.content)
         message_details = {
             'user': user_profile,
-            'message_text': interaction.text,
-            'sentiment_score': message_analysis['sentiment_score'],
-            'subjectivity': message_analysis['message_type'],
+            'message_text': interaction.content,
+            'sentiment_score': int(message_analysis['sentiment_score'][0] * 100),
+            'subjectivity': int(message_analysis['subjectivity'][1] * 100),
             'timestamp': interaction.created_at,
             'guild_id': interaction.guild.id,
             'channel_id': interaction.channel.id,
