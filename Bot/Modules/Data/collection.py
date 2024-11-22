@@ -1,10 +1,14 @@
 import logging
 from datetime import datetime
+from profile import Profile
+
 from .database_models import *
+import statistics
+
 
 
 def create_or_update_user_profile(user_data: dict):
-    logging.info(f"[ Analyzing message of civilizan n°{user_data.get('discriminator')} ]")
+    logging.info(f"[ Analyzing message of civilian n°{user_data.get('discriminator')} ]")
     # Unpack user data from the dictionary
     user_id = user_data.get('user_id')
     username = user_data.get('username')
@@ -12,6 +16,7 @@ def create_or_update_user_profile(user_data: dict):
     avatar_url = user_data.get('avatar_url')
     user_status = user_data.get('user_status')
     last_seen = user_data.get('last_seen')
+    timestamp = user_data.get('timestamp')
     joined_at = user_data.get('joined_at')
     is_bot = user_data.get('is_bot')
     bio = user_data.get('bio')
@@ -27,7 +32,7 @@ def create_or_update_user_profile(user_data: dict):
         'is_bot': is_bot,
         'bio': bio,
         'sentiment_score': 0,
-        'last_interaction': None,
+        'last_interaction': timestamp,
         'created_at': datetime.now(),
     })
     # Update profile fields if the profile already exists (not created)
@@ -52,6 +57,7 @@ def create_or_update_message_details(message_details: dict):
         logging.error(f"User profile not found for ID: {message_details.get('user_id')}")
         return
 
+
     # Unpack message details
     message_text = message_details.get('message_text')
     sentiment_score = message_details.get('sentiment_score')
@@ -63,6 +69,17 @@ def create_or_update_message_details(message_details: dict):
     # Create or update message
     try:
         with db.atomic():
+            past_messages = (
+                Messages
+                .select()
+                .where(Messages.user == user_profile)
+            )
+            sentiments = [message.sentiment_score for message in past_messages]
+            average_sentiment = statistics.mean(sentiments) if sentiments else 0
+            Profiles.update({Profiles.sentiment_score: average_sentiment}).where(
+                Profiles.userid == message_details['user_id']
+            ).execute()
+
             message_record, created = Messages.get_or_create(
                 timestamp=timestamp,
                 user=user_profile,

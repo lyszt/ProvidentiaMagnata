@@ -4,7 +4,8 @@ import re
 
 
 def analyse_message(message_text: str) -> dict :
-    message_text = translate.Translator(to_lang="en").translate(message_text)
+    translator = translate.Translator(from_lang='pt', to_lang="en")
+    message_text = translator.translate(message_text)
     message_sentiment = TextBlob(message_text).sentiment
     subjectivity = TextBlob(message_text).subjectivity
 
@@ -16,7 +17,7 @@ def analyse_message(message_text: str) -> dict :
         message_type = "text"
 
     return {
-        "sentiment_score": message_sentiment,
-        "subjectivity": subjectivity,
+        "sentiment_score": message_sentiment[0]*100,
+        "subjectivity": subjectivity*100,
         "message_type": message_type,
     }
