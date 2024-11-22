@@ -5,7 +5,8 @@ import re
 
 def analyse_message(message_text: str) -> dict :
     message_text = translate.Translator(to_lang="en").translate(message_text)
-    message_sentiment = [TextBlob(message_text).sentiment,TextBlob(message_text).subjectivity]
+    message_sentiment = TextBlob(message_text).sentiment
+    subjectivity = TextBlob(message_text).subjectivity
 
     if re.search(r'https?://', message_text):  # Check for links
         message_type = "link"
@@ -16,5 +17,6 @@ def analyse_message(message_text: str) -> dict :
 
     return {
         "sentiment_score": message_sentiment,
+        "subjectivity": subjectivity,
         "message_type": message_type,
     }

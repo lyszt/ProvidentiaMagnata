@@ -5,8 +5,6 @@ from .database_models import *
 
 def create_or_update_user_profile(user_data: dict):
     logging.info(f"[ Analyzing message of civilizan n°{user_data.get('discriminator')} ]")
-    db = SqliteDatabase("/home/aluno/PycharmProjects/ProvidentiaMagnata/Bot/Data/users.db")
-    db.connect()
     # Unpack user data from the dictionary
     user_id = user_data.get('user_id')
     username = user_data.get('username')
@@ -43,15 +41,18 @@ def create_or_update_user_profile(user_data: dict):
         user_profile.is_bot = is_bot
         user_profile.bio = bio
         user_profile.save()
-    db.close()
+
 
 def create_or_update_message_details(message_details: dict):
     logging.info(f"[ Processing message from user at Guild: {message_details['guild_id']} ]")
-    db = SqliteDatabase("/home/aluno/PycharmProjects/ProvidentiaMagnata/Bot/Data/users.db")
-    db.connect()
 
-    # Unpack message details from the dictionary
-    user_profile = message_details.get('user')
+    # Ensure the user profile exists
+    user_profile = Profiles.get_or_none(userid=message_details['user_id'])
+    if not user_profile:
+        logging.error(f"User profile not found for ID: {message_details.get('user_id')}")
+        return
+
+    # Unpack message details
     message_text = message_details.get('message_text')
     sentiment_score = message_details.get('sentiment_score')
     subjectivity = message_details.get('subjectivity')
@@ -59,28 +60,32 @@ def create_or_update_message_details(message_details: dict):
     guild_id = message_details.get('guild_id')
     channel_id = message_details.get('channel_id')
 
-    # Create or update message record in the database
-    message_record, created = Messages.get_or_create(
-        timestamp=timestamp,
-        guild_id=guild_id,
-        channel_id=channel_id,
-        user=user_profile,  # Foreign Key
-        defaults={
-            'message_text': message_text,
-            'sentiment_score': sentiment_score,
-            'subjectivity': subjectivity,
-            'created_at': datetime.now(),
-        }
-    )
+    # Create or update message
+    try:
+        with db.atomic():
+            message_record, created = Messages.get_or_create(
+                timestamp=timestamp,
+                user=user_profile,
+                channel_id=channel_id,
+                guild_id=guild_id,
+                defaults={
+                    'message_text': message_text,
+                    'sentiment_score': sentiment_score,
+                    'subjectivity': subjectivity,
+                }
+            )
+            if not created:
+                message_record.message_text = message_text
+                message_record.sentiment_score = sentiment_score
+                message_record.subjectivity = subjectivity
+                message_record.save()
+                logging.info(f"Updated message for user.")
+            else:
+                logging.info(f"Created new message for user.")
+    except Exception as e:
+        logging.error(f"Error while creating/updating message record: {e}")
 
-    # Update message fields if the message already exists (not created)
-    if not created:
-        message_record.message_text = message_text
-        message_record.sentiment_score = sentiment_score
-        message_record.subjectivity = subjectivity
-        message_record.save()
 
-    db.close()
 class UserCollect:
     def __init__(self):
         pass

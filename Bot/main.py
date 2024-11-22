@@ -71,13 +71,15 @@ async def on_message(interaction):
         message_analysis = analyse_message(interaction.content)
         message_details = {
             'user': user_profile,
+            'user_id': interaction.author.id,
             'message_text': interaction.content,
-            'sentiment_score': message_analysis['sentiment_score'][0] * 100,
-            'subjectivity': message_analysis['sentiment_score'][1] * 100,
+            'sentiment_score': str(message_analysis['sentiment_score']),  # Already scaled by 100
+            'subjectivity': str(message_analysis['subjectivity']),  # Already scaled by 100
             'timestamp': interaction.created_at,
             'guild_id': interaction.guild.id,
             'channel_id': interaction.channel.id,
         }
+
         create_or_update_message_details(message_details)
 
 @atexit.register
