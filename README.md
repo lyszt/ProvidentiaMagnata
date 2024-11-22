@@ -7,6 +7,7 @@
 ![2B from Nier](https://i.pinimg.com/736x/bf/72/8e/bf728e21ac0304a71332b9878f1cbc61.jpg)
 
 **Providentia Magnata** is a fully functional, Discord-based surveillance and control AI designed for server espionage and member analysis. Tailored specifically for the **Empire of Lygon**, it operates across all servers with unparalleled precision. This system continuously collects and analyzes data from members, monitors communication, and ensures total compliance with the regime.
+![image](https://github.com/user-attachments/assets/4289137a-b500-4182-b809-3f165421d67b)
 
 <audio controls>
   <source src="Speech/presentation.mp3">
