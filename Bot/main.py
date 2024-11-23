@@ -8,15 +8,16 @@ from openai import OpenAI
 
 # Util Imports
 import atexit
+import random
 
 # Running imports
 from dotenv import load_dotenv
 
 # Modules
+from Modules.Utils import lists
 from Modules.configuration import *
 from Modules.Data.collection import *
 from Modules.Data.message_analysis import *
-
 from Modules.Speech.speech import *
 # GLOBALS
 ENV = "Config/providence.env"
@@ -30,6 +31,24 @@ client = discord.Client(intents=intents)
 @client.event
 async def on_ready():
     logging.info(f"Providence initialized at {datetime.now()}")
+    await client.wait_until_ready()
+    await client.change_presence(status=discord.Status.dnd, activity=(
+        discord.Activity(type=discord.ActivityType.listening, name=random.choice(lists.activity_variations))))
+    @tasks.loop(minutes=5)
+    async def change_presence_task(self):
+        try:
+            await client.change_presence(
+                status=discord.Status.dnd,
+                activity=discord.Activity(
+                    type=discord.ActivityType.listening,
+                    name=random.choice(lists.activity_variations)
+                )
+            )
+        except Exception as e:
+            logging.info("Could not change presence: ", e)
+        self.change_presence_task.start()
+
+
 @client.event
 async def on_message(interaction):
     if interaction.author == client.user:
@@ -60,7 +79,7 @@ async def on_message(interaction):
         create_or_update_user_profile(user_details)
         message_analysis = analyse_message(message_text)
         # 10 messages per context for topic analysis
-        history = interaction.channel.history(limit=10)
+        history = interaction.channel.history(limit=5)
         conversational_context = "" + f"{interaction.author.name} diz: {interaction.content}"
         async for msg in history:
             conversational_context += f"{msg.author.name} diz: {msg.content}\n"
