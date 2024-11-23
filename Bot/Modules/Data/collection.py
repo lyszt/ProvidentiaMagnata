@@ -65,6 +65,8 @@ def create_or_update_message_details(message_details: dict):
     timestamp = message_details.get('timestamp')
     guild_id = message_details.get('guild_id')
     channel_id = message_details.get('channel_id')
+    topic = message_details.get('topic')
+    message_id = message_details.get('message_id')
 
     # Create or update message
     try:
@@ -99,6 +101,20 @@ def create_or_update_message_details(message_details: dict):
                 logging.info(f"Updated message for user.")
             else:
                 logging.info(f"Created new message for user.")
+
+            topic_record, created = MessageTopics.get_or_create(
+                message=message_record,
+                defaults={
+                    'topic_name': f"{topic}",
+                    'message_id': message_id,
+                }
+            )
+            if not created:
+                topic_record.message_id = message_id
+                topic_record.save()
+                logging.info(f"Updated topic for message.")
+            else:
+                logging.info(f"Created message topic for analysis.")
     except Exception as e:
         logging.error(f"Error while creating/updating message record: {e}")
 

@@ -1,7 +1,7 @@
 from peewee import Model, CharField, SqliteDatabase, DateTimeField, BooleanField, TextField, IntegerField, \
     ForeignKeyField, FloatField
 
-db = SqliteDatabase("/home/aluno/PycharmProjects/ProvidentiaMagnata/Bot/Data/users.db")
+db = SqliteDatabase("C:\\Users\\neoka\PycharmProjects\ProvidentiaMagnata\Bot\Data\\users.db")
 
 # USER PROFILING
 
@@ -40,7 +40,6 @@ class Messages(Model):
 class MessageTopics(Model):
     message = ForeignKeyField(Messages, backref='topics')
     topic_name = CharField()  # Topic, e.g., 'music', 'gaming', 'tech', etc.
-    relevance_score = IntegerField()  # A score indicating how relevant this topic is to the message
 
     class Meta:
         database = db  # Specify the database connection to use
