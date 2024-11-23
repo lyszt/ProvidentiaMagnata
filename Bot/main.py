@@ -42,13 +42,13 @@ async def on_message(interaction):
         return
     if(interaction.author.bot):
         return
-    if(interaction.author.id == 345703655757971456):
-        if(interaction.content == "Providentia, faça uma análise de perfil do Hard."):
+    if(interaction.author.id == 1047943536374464583):
+        if(interaction.content == "vai de novo"):
             logging.info("Iniciando...")
-            user_id = 1150526796584976444  # The user ID you're looking for
+            user_id = 345703655757971456  # The user ID you're looking for
             messages = []
 
-            async for message in interaction.channel.history(limit=500):  # Adjust limit as needed
+            async for message in interaction.channel.history(limit=1000):  # Adjust limit as needed
                 if message.author.id == user_id:
                     messages.append((message.content, message.created_at))
 
@@ -62,7 +62,7 @@ async def on_message(interaction):
                 “Usuário 42 foi marcado por potencial dissidência. Análise adicional necessária.”
                 “Mensagem excluída. Liberdade não é permitida no Império de Lygon.”
                 
-                Faça uma analise deste membro e suas mensagens. Quem é ele? Diga exatamente quem ele é. Faça um perfil de estudo de comportamento, psicologico e policial: {messages}
+                Este é Hardchokat. Faça uma analise deste membro e suas mensagens. Quem é ele? Diga exatamente quem ele é. Faça um perfil de estudo de comportamento, psicologico e policial. Seja direta, máximo 3 ou 2 paragrafos. Dados dele: {messages}
             """)
             await interaction.channel.send(response)
 

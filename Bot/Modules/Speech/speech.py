@@ -12,11 +12,11 @@ class Language:
         completion = client.chat.completions.create(
             model="o1-preview",
             messages=[
-                {
-                    "role": "user",
-                    "content": f"{input}"
-                }
-            ]
-        )
+                    {
+                        "role": "user",
+                        "content": f"{input}",
+                    }
+                ]
+            )
         return completion.choices[0].message.content
 
