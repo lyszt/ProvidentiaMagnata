@@ -3,3 +3,4 @@ python-dotenv
 peewee
 textblob
 translate
+openai

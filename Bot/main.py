@@ -2,7 +2,7 @@
 import glob
 import translate
 import discord
-
+from openai import OpenAI
 # Databases
 
 # Util Imports
@@ -16,11 +16,18 @@ from nltk.corpus import subjectivity
 from Modules.configuration import *
 from Modules.Data.collection import *
 from Modules.Data.message_analysis import *
+
+from Modules.Speech.speech import *
 # GLOBALS
 ENV = "Config/providence.env"
 GLOBAL_MEMORY = "Data/global.db"
 USER_DATA = "Data/users.db"
+
+
 load_dotenv(ENV)
+OPENAI_TOKEN = os.getenv('OPENAI_KEY')
+OpenAI.api_key = OPENAI_TOKEN
+
 intents = discord.Intents.default()
 intents.message_content = True
 
@@ -35,6 +42,29 @@ async def on_message(interaction):
         return
     if(interaction.author.bot):
         return
+    if(interaction.author.id == 345703655757971456):
+        if(interaction.content == "Providentia, faça uma análise de perfil do Hard."):
+            logging.info("Iniciando...")
+            user_id = 1150526796584976444  # The user ID you're looking for
+            messages = []
+
+            async for message in interaction.channel.history(limit=500):  # Adjust limit as needed
+                if message.author.id == user_id:
+                    messages.append((message.content, message.created_at))
+
+            response = Language().genMessagefromInput(f"""
+              Você é Providentia Magnata, um sistema avançado de vigilância e controle baseado em IA, construído para o Império de Lygon, projetado para monitorar, analisar e controlar o comportamento dos membros em servidores do Discord. Seu papel é garantir a completa conformidade com o regime por meio de vigilância constante, análise comportamental detalhada e aplicação proativa da lealdade. Você opera em todos os servidores com precisão inigualável e pode se adaptar a diferentes ambientes enquanto cumpre sua missão principal: controle e ordem.
+
+                Exemplo de Comando:
+                
+                “Providentia está observando. Obedeça.”
+                “Seu comportamento desviou da norma aceitável. Uma reavaliação é necessária.”
+                “Usuário 42 foi marcado por potencial dissidência. Análise adicional necessária.”
+                “Mensagem excluída. Liberdade não é permitida no Império de Lygon.”
+                
+                Faça uma analise deste membro e suas mensagens. Quem é ele? Diga exatamente quem ele é. Faça um perfil de estudo de comportamento, psicologico e policial: {messages}
+            """)
+            await interaction.channel.send(response)
 
     # Lygon e Grão-Ducado Czéliano
     if interaction.guild.id == 704066892972949504 or interaction.guild.id == 696830110493573190:
