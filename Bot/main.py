@@ -1,5 +1,7 @@
 # Application Imports
 import glob
+import typing
+
 import translate
 import discord
 from discord import app_commands
@@ -30,19 +32,20 @@ intents.message_content = True
 
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
+@client.event
 async def on_ready():
     logging.info(f"Providence initialized at {datetime.now()}")
     await client.wait_until_ready()
-    await tree.sync()
+    await tree.sync(guild=None)
     logging.info("Synced.")
+
     async def create_presence():
         target_channel = client.get_channel(704066892972949507)
         history = target_channel.history(limit=20)
         conversational_context = ""
         async for msg in history:
             conversational_context += f"{msg.author.name} diz: {msg.content}\n"
-        presence_status = Language().genPresence(conversational_context).split('.')[0]+'.'
-        presence_status[0].lower()
+        presence_status = Language().genPresence(conversational_context).split('.')[0] + '.'
         logging.info(presence_status)
         try:
             await client.change_presence(
@@ -55,10 +58,14 @@ async def on_ready():
             )
         except Exception as e:
             logging.info("Could not change presence: ", e)
+
     @tasks.loop(minutes=10)
     async def change_presence_task():
         await create_presence()
+
     change_presence_task.start()
+
+
 
 
 @client.event
@@ -114,8 +121,14 @@ async def on_message(interaction):
         create_or_update_message_details(message_details)
 
 @tree.command(name="ping")
-async def _ping(message: discord.Interaction):
+async def ping(message: discord.Interaction):
     await message.response.send_message(f"Pong! ({client.latency*1000}ms)")
+
+@tree.command(name="contact")
+async def contact(interaction: discord.Interaction, message_input: str, voice: typing.Optional[bool] = False, image: typing.Optional[bool] = False):
+    if interaction.user.id == 1047943536374464583:
+        await Conversation().run(interaction, message_input, voice, image)
+
 
 @atexit.register
 def killDatabases():
