@@ -38,14 +38,14 @@ async def on_ready():
         conversational_context = ""
         async for msg in history:
             conversational_context += f"{msg.author.name} diz: {msg.content}\n"
-        presence_status = '. ' + Language().genPresence(conversational_context).split('.')[0]+'.'
+        presence_status = Language().genPresence(conversational_context).split('.')[0]+'.'
         presence_status[0].lower()
         logging.info(presence_status)
         try:
             await client.change_presence(
                 status=discord.Status.dnd,
                 activity=discord.Activity(
-                    type=discord.ActivityType.streaming,
+                    type=discord.ActivityType.watching,
                     name=presence_status,
                     url="https://www.youtube.com/watch?v=1DwmADdc8EE"
                 )
