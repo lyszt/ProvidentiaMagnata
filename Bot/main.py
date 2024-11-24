@@ -40,7 +40,8 @@ async def on_ready():
     logging.info("Synced.")
 
     async def create_presence():
-        target_channel = client.get_channel(704066892972949507)
+        last_message = Messages.select().order_by(Messages.timestamp.desc()).limit(1).get()
+        target_channel = client.get_channel(int(last_message.channel_id))
         history = target_channel.history(limit=20)
         conversational_context = ""
         async for msg in history:
