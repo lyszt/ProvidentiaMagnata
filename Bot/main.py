@@ -32,21 +32,30 @@ client = discord.Client(intents=intents)
 async def on_ready():
     logging.info(f"Providence initialized at {datetime.now()}")
     await client.wait_until_ready()
-    await client.change_presence(status=discord.Status.dnd, activity=(
-        discord.Activity(type=discord.ActivityType.listening, name=random.choice(lists.activity_variations))))
-    @tasks.loop(minutes=5)
-    async def change_presence_task(self):
+    async def create_presence():
+        target_channel = client.get_channel(704066892972949507)
+        history = target_channel.history(limit=20)
+        conversational_context = ""
+        async for msg in history:
+            conversational_context += f"{msg.author.name} diz: {msg.content}\n"
+        presence_status = 'informações para a central. ' + Language().genPresence(conversational_context).split('.')[0]+'.'
+        presence_status[0].lower()
+        logging.info(presence_status)
         try:
             await client.change_presence(
                 status=discord.Status.dnd,
                 activity=discord.Activity(
-                    type=discord.ActivityType.listening,
-                    name=random.choice(lists.activity_variations)
+                    type=discord.ActivityType.streaming,
+                    name=presence_status,
+                    url="https://www.youtube.com/watch?v=d3clrkLNTSA"
                 )
             )
         except Exception as e:
             logging.info("Could not change presence: ", e)
-        self.change_presence_task.start()
+    await create_presence()
+    @tasks.loop(minutes=5)
+    async def change_presence_task(self):
+        await create_presence()
 
 
 @client.event

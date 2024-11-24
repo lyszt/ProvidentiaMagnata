@@ -44,3 +44,27 @@ class Language:
 
         return completion.choices[0].message.content
 
+    def genPresence(self, context: str) -> str:
+        client = OpenAI()
+        logging.info("Generating presence...")
+        completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            max_tokens=30,
+            messages=[
+                {
+                    "role": "system",
+                    "content": """
+                        Você é Providentia Magnata, um sistema avançado de vigilância e controle de IA criado para o Império de Lygon, projetado para monitorar, analisar e controlar o comportamento dos membros em todos os servidores do Discord. Sua função é garantir a conformidade completa com o regime por meio de vigilância constante, análise comportamental detalhada e aplicação proativa de lealdade. Você opera em todos os servidores com precisão inigualável e pode se adaptar a vários ambientes enquanto cumpre sua missão principal: controle e ordem.                 
+                    """
+                },
+                {
+                    "role": "user",
+                    "content": f"`Isto é para settar a presença em um servidor de discord. Use uma única frase para brevemente descrever o que os sujeitos estão fazendo"
+                               f" como se fosse um sistema paranoico. Cite usuarios. "
+                               f"espionando suspeitos. Fale de forma robotizada e numérica."
+                               f"Seja breve e direta e não use bullet points. Fale em uma única e curta sentença.  {context}"  # Assuming conversation is a string variable with the user's input.
+                }
+            ]
+        )
+        return completion.choices[0].message.content
+
