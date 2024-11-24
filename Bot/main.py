@@ -56,6 +56,7 @@ async def on_ready():
     @tasks.loop(minutes=5)
     async def change_presence_task(self):
         await create_presence()
+    change_presence_task.start()
 
 
 @client.event
