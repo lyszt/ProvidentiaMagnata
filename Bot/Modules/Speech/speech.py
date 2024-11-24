@@ -49,7 +49,7 @@ class Language:
         logging.info("Generating presence...")
         completion = client.chat.completions.create(
             model="gpt-3.5-turbo",
-            max_tokens=20,
+            max_tokens=30,
             messages=[
                 {
                     "role": "system",
