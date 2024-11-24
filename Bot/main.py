@@ -2,6 +2,7 @@
 import glob
 import translate
 import discord
+from discord import app_commands
 from discord.ext import tasks, commands
 from openai import OpenAI
 # Databases
@@ -28,10 +29,12 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 client = discord.Client(intents=intents)
-@client.event
+tree = app_commands.CommandTree(client)
 async def on_ready():
     logging.info(f"Providence initialized at {datetime.now()}")
     await client.wait_until_ready()
+    await tree.sync()
+    logging.info("Synced.")
     async def create_presence():
         target_channel = client.get_channel(704066892972949507)
         history = target_channel.history(limit=20)
@@ -52,7 +55,7 @@ async def on_ready():
             )
         except Exception as e:
             logging.info("Could not change presence: ", e)
-    @tasks.loop(minutes=5)
+    @tasks.loop(minutes=10)
     async def change_presence_task():
         await create_presence()
     change_presence_task.start()
@@ -110,6 +113,10 @@ async def on_message(interaction):
 
         create_or_update_message_details(message_details)
 
+@tree.command(name="ping")
+async def _ping(message: discord.Interaction):
+    await message.response.send_message(f"Pong! ({client.latency*1000}ms)")
+
 @atexit.register
 def killDatabases():
     logging.info("Killing databases...")
@@ -118,8 +125,6 @@ def killDatabases():
         if not db.is_closed():
             db.close()
             logging.info(f"Closed database: {db_file}")
-
-
 
 
 if __name__ == '__main__':
