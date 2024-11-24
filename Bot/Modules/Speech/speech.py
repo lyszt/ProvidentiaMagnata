@@ -1,13 +1,26 @@
+# Utils
 import logging
 import os
-
+# Application
 import discord
 import openai
 import requests
 from openai import OpenAI
+from pydub import AudioSegment
+from pydub.effects import speedup
 
+# Specifics
 from Bot.Modules.Speech.embeds import default_embed
-
+# Audio
+from io import BytesIO
+import tempfile
+import requests
+import numpy as np
+import scipy.signal as sg
+import pydub
+import matplotlib.pyplot as plt
+from IPython.display import Audio, display
+import tempfile
 
 class Language:
     def __init__(self):
@@ -102,39 +115,72 @@ class Conversation:
 
     async def gen_audio(self, interaction, dialogue):
         key = os.getenv('ELEVENLABS_KEY')
-        CHUNK_SIZE = 1024  # Size of chunks to read/write at a time
-        XI_API_KEY = f"{key}"  # Your API key for authentication
-        VOICE_ID = "LcfcDJNUP1GQjkzn1xUU"  # ID of the voice model to use
-        TEXT_TO_SPEAK = f"{dialogue}"  # Text you want to convert to speech
-        OUTPUT_PATH = "speech.mp3"  # Path to save the output audio file
+        CHUNK_SIZE = 1024
+        XI_API_KEY = f"{key}"
+        VOICE_ID = "LcfcDJNUP1GQjkzn1xUU"
+        TEXT_TO_SPEAK = f"{dialogue}"
+        OUTPUT_PATH = "temp/speech.mp3"
+        BACKGROUND_PATH = "../Speech/hexcore.mp3"
 
         tts_url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}/stream"
         headers = {
             "Accept": "application/json",
             "xi-api-key": XI_API_KEY
         }
+
         data = {
             "text": TEXT_TO_SPEAK,
             "model_id": "eleven_multilingual_v1",
             "voice_settings": {
-                "stability": 0.15,
-                "similarity_boost": 0.6,
+                "stability": 0.1,
+                "similarity_boost": 0.4,
                 "style": 0.0,
                 "use_speaker_boost": True
             }
         }
+
         response = requests.post(tts_url, headers=headers, json=data, stream=True)
+
         if response.ok:
-            # Open the output file in write-binary mode
             with open(OUTPUT_PATH, "wb") as f:
-                # Read the response in chunks and write to the file
                 for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
                     f.write(chunk)
-            # Inform the user of success
+
             logging.info("Audio stream saved successfully.")
         else:
-            # Print the error message if the request was not successful
-            logging.info(response.text)
+            logging.error(response.text)
+            return None, None
+
+        audio = AudioSegment.from_mp3(OUTPUT_PATH)
+        background_song = AudioSegment.from_mp3(BACKGROUND_PATH)
+        background_song = background_song - 20
+        if len(background_song) < len(audio):
+            times_to_loop = len(audio) // len(background_song) + 1
+            background_song = background_song * times_to_loop
+        background_song = background_song[:len(audio)]
+        silence_duration = 300
+        words = audio.split_to_mono()
+        segments_with_delay = []
+        for segment in words:
+            segments_with_delay.append(segment)
+            silence = AudioSegment.silent(duration=silence_duration)
+            segments_with_delay.append(silence)
+
+        delayed_audio = sum(segments_with_delay)
+        eq_filtered_audio = delayed_audio.low_pass_filter(1000)
+
+        distorted_audio = eq_filtered_audio
+
+        delay_ms = 500
+        decay = 0.5
+        delay_samples = int(distorted_audio.frame_rate * (delay_ms / 1000.0))
+        echo_audio = AudioSegment.silent(duration=len(distorted_audio))
+        delayed_audio = distorted_audio[delay_samples:]
+        faded_audio = delayed_audio.fade_out(int(len(delayed_audio) * decay))
+        echo_audio = distorted_audio.overlay(faded_audio, position=delay_samples)
+
+        combined_audio = background_song.overlay(echo_audio)
+        combined_audio.export(OUTPUT_PATH, format='mp3')
 
         audio = discord.File(OUTPUT_PATH)
         await interaction.channel.send(file=audio)
