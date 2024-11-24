@@ -49,7 +49,7 @@ class Language:
         logging.info("Generating presence...")
         completion = client.chat.completions.create(
             model="gpt-3.5-turbo",
-            max_tokens=30,
+            max_tokens=20,
             messages=[
                 {
                     "role": "system",
@@ -59,9 +59,9 @@ class Language:
                 },
                 {
                     "role": "user",
-                    "content": f"`Isto é para settar a presença em um servidor de discord. Use uma única frase para brevemente descrever o que os sujeitos estão fazendo"
-                               f" como se fosse um sistema paranoico. Cite usuarios. "
-                               f"espionando suspeitos. Fale de forma robotizada e numérica."
+                    "content": f"`Isto é para settar a presença em um servidor de discord. Use uma única frase para brevemente classificar a situação como uma ameaça. Cite um dos usuários."
+                               f" como se fosse um sistema paranoico. "
+                               f"espionando. Fale de forma robotizada e numérica."
                                f"Seja breve e direta e não use bullet points. Fale em uma única e curta sentença.  {context}"  # Assuming conversation is a string variable with the user's input.
                 }
             ]

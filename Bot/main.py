@@ -38,7 +38,7 @@ async def on_ready():
         conversational_context = ""
         async for msg in history:
             conversational_context += f"{msg.author.name} diz: {msg.content}\n"
-        presence_status = 'informações para a central. ' + Language().genPresence(conversational_context).split('.')[0]+'.'
+        presence_status = '. ' + Language().genPresence(conversational_context).split('.')[0]+'.'
         presence_status[0].lower()
         logging.info(presence_status)
         try:
@@ -47,7 +47,7 @@ async def on_ready():
                 activity=discord.Activity(
                     type=discord.ActivityType.streaming,
                     name=presence_status,
-                    url="https://www.youtube.com/watch?v=d3clrkLNTSA"
+                    url="https://www.youtube.com/watch?v=1DwmADdc8EE"
                 )
             )
         except Exception as e:
