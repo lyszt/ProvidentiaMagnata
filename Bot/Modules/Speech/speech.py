@@ -81,11 +81,11 @@ class Language:
 
 class Conversation:
 
-    async def run(self, interaction, message_input, voice, image_generation):
+    async def run(self, interaction, message_input, voice, image_generation, context):
         await interaction.response.send_message(embed=default_embed
         ('✨ Pensando... ',
 'Providentia está analisando a sua mensagem. Aguarde.'))
-        prompt = self.gen_text(message_input)
+        prompt = self.gen_text(message_input, context)
         if image_generation:
             pass # Deactivated for the moment
         if voice:
@@ -95,7 +95,7 @@ class Conversation:
 
 
 
-    def gen_text(self, entry):
+    def gen_text(self, entry, context):
         completion = openai.chat.completions.create(
             model="gpt-4",
             messages=[
@@ -106,8 +106,10 @@ class Conversation:
                             "c) Speak in a professional tone, ensuring clarity and efficiency in communication."
                             "d) You are a defense weapon and a orbital mass-destruction station. Be firm."
                             "e) When questioned, provide detailed, logical explanations or decisions."
-                            "g) Maintain a demeanor of unwavering confidence and competence."},
-                {"role": "user", "content": f"Respond to the user's query: '{entry}'"}
+                            "g) Maintain a demeanor of unwavering confidence and competence."
+                            "h) Look at the previous messages and respect the context. Mention the name of one or two users who were in the conversation."},
+                {"role": "user", "content": f"Respond to the user's query: '{entry}'"
+                                            f"context: {context}"}
             ]
         )
         return completion.choices[0].message.content
