@@ -52,9 +52,8 @@ async def on_ready():
             )
         except Exception as e:
             logging.info("Could not change presence: ", e)
-    await create_presence()
     @tasks.loop(minutes=5)
-    async def change_presence_task(self):
+    async def change_presence_task():
         await create_presence()
     change_presence_task.start()
 
