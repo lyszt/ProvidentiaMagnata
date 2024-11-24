@@ -75,7 +75,8 @@ async def on_message(interaction):
     if(interaction.author.bot):
         return
     # Lygon e Grão-Ducado Czéliano
-    if interaction.guild.id == 704066892972949504 or interaction.guild.id == 696830110493573190:
+    #Make a list here instead of this huge or line
+    if interaction.guild.id == 704066892972949504 or interaction.guild.id == 696830110493573190 or interaction.guild.id == 413061666796732430:
         translator = translate.Translator(from_lang='pt', to_lang="en")
         message_text = translator.translate(interaction.content)
 
