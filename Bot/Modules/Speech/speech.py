@@ -77,6 +77,22 @@ class Language:
         )
         return completion.choices[0].message.content
 
+    def defineUser(self, context: dict) -> str:
+        completion = openai.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system",
+                 "content": "Você é um sistema de vigilância. "
+                            "Descubra tudo o que puder sobre este alvo com base nas "
+                            "informações do banco de dados dele. Informe se ele é uma "
+                            "ameaça e o que ele gosta.",
+                 },
+                 {"role": "user",
+                 "content": f"{context}"},
+            ]
+        )
+        return completion.choices[0].message.content
+
 
 class Conversation:
 

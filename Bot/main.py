@@ -7,6 +7,7 @@ import discord
 from discord import app_commands
 from discord.ext import tasks, commands
 from openai import OpenAI
+from nltk.probability import FreqDist
 # Databases
 
 # Util Imports
@@ -15,7 +16,9 @@ import random
 
 # Running imports
 from dotenv import load_dotenv
+from peewee import DoesNotExist
 
+from Bot.Modules.Speech.embeds import whois_embed
 # Modules
 from Modules.configuration import *
 from Modules.Data.collection import *
@@ -134,7 +137,38 @@ async def contact(interaction: discord.Interaction, message_input: str, voice: t
             conversational_context += f"{msg.author.name} diz: {msg.content}\n"
         await Conversation().run(interaction, message_input, voice, image, conversational_context)
 
+@tree.command(name="whois")
+async def whois(interaction: discord.Interaction, target: discord.Member):
+    await interaction.response.send_message(embed=default_embed("✨ Analisando...", "Aguarde enquanto verificamos a base de dados."))
+    try:
+        user = Profiles.get(Profiles.userid == target.id)
+    except DoesNotExist:
+        await interaction.response.send_message(f"User {target.display_name} does not have a profile.", ephemeral=True)
+        return
 
+    messages = Messages.select().where(Messages.user_id == user.id)
+
+    sentiment = user.sentiment_score
+
+    topic_query = (
+        MessageTopics.select()
+        .join(Messages)
+        .where(Messages.user_id == user.id)
+    )
+    topics = [topic.topic_name for topic in topic_query]
+    topic_distribution = FreqDist(topics)
+    preferred_topics = topic_distribution.most_common()
+
+    context = {
+        'messages': list(messages),
+        'sentiment': sentiment,
+        'is_bot': target.bot,
+        'joined_at': target.joined_at.isoformat() if target.joined_at else None,
+        'favorite_topic': preferred_topics,
+    }
+    response = Language().defineUser(context)
+    embed = whois_embed(target.name, response, target.avatar)
+    await interaction.edit_original_response(embed=embed)
 @atexit.register
 def killDatabases():
     logging.info("Killing databases...")
