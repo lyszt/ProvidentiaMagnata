@@ -17,7 +17,6 @@ import random
 from dotenv import load_dotenv
 
 # Modules
-from Modules.Utils import lists
 from Modules.configuration import *
 from Modules.Data.collection import *
 from Modules.Data.message_analysis import *
