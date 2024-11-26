@@ -21,6 +21,7 @@ from dotenv import load_dotenv
 from peewee import DoesNotExist
 
 from Bot.Modules.Speech.embeds import whois_embed
+from Bot.Modules.Spying.investigate import bing_search, get_from_database
 # Modules
 from Modules.configuration import *
 from Modules.Data.collection import *
@@ -143,51 +144,12 @@ async def contact(interaction: discord.Interaction, message_input: str, voice: t
 async def whois(interaction: discord.Interaction, target: discord.Member):
     await interaction.response.send_message(embed=default_embed("✨ Analisando...", "Aguarde enquanto verificamos a base de dados."))
 
-    import requests
-    from bs4 import BeautifulSoup
-
-    url = f"https://www.bing.com/search?q=\"{target.name}\""
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-    }
-    response = requests.get(url, headers=headers)
-    soup = BeautifulSoup(response.text, "html.parser")
-    # print(soup.prettify())
-    results = []
-
-    for item in soup.find_all("li", {"class": "b_algo"}):
-        link = item.find("a")["href"]
-        snippet = item.find("p")  # Bing typically places the description in a <p> tag
-
-        if snippet:
-            snippet_text = snippet.get_text()
-        else:
-            snippet_text = "No description available"
-
-        results.append(snippet_text)
-
-
-    try:
-        user = Profiles.get(Profiles.userid == target.id)
-    except DoesNotExist:
-        await interaction.edit_original_response(f"User {target.display_name} does not have a profile.", ephemeral=True)
-        return
-
-    messages = Messages.select().where(Messages.user_id == user.id).execute()
-
-
-    sentiment = user.sentiment_score
-    topic_query = (
-        MessageTopics
-        .select(MessageTopics.topic_name)
-        .join(Messages, on=(MessageTopics.message_id == Messages.id))
-        .where(Messages.user_id == user.id)
-    )
-
-    topics = [topic for topic in topic_query]
-    topic_distribution = FreqDist(topics)
-    preferred_topics = topic_distribution.most_common()
-    messages = [message.message_text for message in messages]
+    results = bing_search(target.name)
+    user_info = get_from_database(target)
+    messages = user_info['messages']
+    topics = user_info['topics']
+    preferred_topics = user_info['preferred_topics']
+    sentiment = user_info['sentiment']
 
     context = {
         'target_name': target.display_name,
