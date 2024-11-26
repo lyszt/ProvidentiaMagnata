@@ -13,6 +13,8 @@ from nltk.probability import FreqDist
 # Util Imports
 import atexit
 import random
+from bs4 import BeautifulSoup
+import requests
 
 # Running imports
 from dotenv import load_dotenv
@@ -140,31 +142,64 @@ async def contact(interaction: discord.Interaction, message_input: str, voice: t
 @tree.command(name="whois")
 async def whois(interaction: discord.Interaction, target: discord.Member):
     await interaction.response.send_message(embed=default_embed("✨ Analisando...", "Aguarde enquanto verificamos a base de dados."))
+
+    import requests
+    from bs4 import BeautifulSoup
+
+    url = f"https://www.bing.com/search?q=\"aldynor\""
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
+    response = requests.get(url, headers=headers)
+    soup = BeautifulSoup(response.text, "html.parser")
+    # print(soup.prettify())
+    results = []
+
+    for item in soup.find_all("li", {"class": "b_algo"}):
+        link = item.find("a")["href"]
+        snippet = item.find("p")  # Bing typically places the description in a <p> tag
+
+        if snippet:
+            snippet_text = snippet.get_text()
+        else:
+            snippet_text = "No description available"
+
+        results.append(snippet_text)
+
+
     try:
         user = Profiles.get(Profiles.userid == target.id)
     except DoesNotExist:
-        await interaction.response.send_message(f"User {target.display_name} does not have a profile.", ephemeral=True)
+        await interaction.edit_original_response(f"User {target.display_name} does not have a profile.", ephemeral=True)
         return
 
-    messages = Messages.select().where(Messages.user_id == user.id)
+    messages = Messages.select().where(Messages.user_id == user.id).execute()
+
 
     sentiment = user.sentiment_score
-
     topic_query = (
-        MessageTopics.select()
-        .join(Messages)
+        MessageTopics
+        .select(MessageTopics.topic_name)
+        .join(Messages, on=(MessageTopics.message_id == Messages.id))
         .where(Messages.user_id == user.id)
     )
-    topics = [topic.topic_name for topic in topic_query]
+
+    topics = [topic for topic in topic_query]
     topic_distribution = FreqDist(topics)
     preferred_topics = topic_distribution.most_common()
+    messages = [message.message_text for message in messages]
 
     context = {
-        'messages': list(messages),
+        'target_name': target.display_name,
+        'messages': messages,
+        'amount of messages': len(messages),
+        'amount of topics': len(topics),
+        'all topics': topics,
         'sentiment': sentiment,
         'is_bot': target.bot,
         'joined_at': target.joined_at.isoformat() if target.joined_at else None,
         'favorite_topic': preferred_topics,
+        'google_info': results
     }
     response = Language().defineUser(context)
     embed = whois_embed(target.name, response, target.avatar)

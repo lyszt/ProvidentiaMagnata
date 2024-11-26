@@ -14,3 +14,4 @@ requests~=2.32.3
 ffmpeg-python
 audioop-lts
 nltk
+beautifulsoup4
