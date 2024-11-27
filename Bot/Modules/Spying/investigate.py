@@ -25,14 +25,18 @@ def bing_search(target):
     results = []
 
     for item in soup.find_all("li", {"class": "b_algo"}):
-        snippet = item.find("p")  # Bing typically places the description in a <p> tag
+        description_text = ""
+        description = item.find("p")
+        title = item.find("a")
+        if title:
+            description_text += title.get_text()
+        if description:
+            description_text += f" {description.get_text()}"
 
-        if snippet:
-            snippet_text = snippet.get_text()
-        else:
-            snippet_text = "No description available"
+        if description_text == "":
+            description_text = "No description available"
 
-        results.append(snippet_text)
+        results.append(description_text)
         return results
 
 def get_from_database(user: discord.Member) -> dict:
@@ -57,8 +61,8 @@ def get_from_database(user: discord.Member) -> dict:
         topic_query = (
             MessageTopics
             .select(MessageTopics.topic_name)
-            .join(Messages, on=(MessageTopics.message == Messages.id))
-            .where(Messages.user == user.id)
+            .join(Messages, on=(MessageTopics.message_id == Messages.message_id))
+            .where(Messages.user_id == user_profile.id)
         )
         topics = [topic.topic_name for topic in topic_query]
         topic_distribution = Counter(topics)
@@ -71,7 +75,7 @@ def get_from_database(user: discord.Member) -> dict:
     return {
         'messages': messages if messages else 'No messages available',
         'amount of messages': len(messages) if messages else 'No message counted.',
-        'topics': len(topics) if topics else 'No topics available',
+        'topics': topics if topics else 'No topics available',
         'preferred_topics': preferred_topics if preferred_topics else 'No preferred topics available',
         'sentiment': sentiment if sentiment is not None else 'Sentiment data unavailable'
     }

@@ -35,7 +35,7 @@ class Language:
                     "role": "system",
                     "content": """
                         We're trying to analyze a user message. This will be put into a database.
-                        ALWAYS RESPOND IN ONE WORD. Otherwise there will be trpuble. 
+                        ALWAYS RESPOND IN ONE WORD. Otherwise there will be trouble. 
                         Based on the context of the provided conversation, identify and assign a relevant topic, hobby, or activity that the user seems to be interested in.
                         Use one specific word to describe this interest, hobby, or activity.
                         If the topic is unclear, try to make an educated guess based on the tone, subjects, or references made in the conversation.
