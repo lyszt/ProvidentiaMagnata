@@ -1,5 +1,6 @@
 # Application Imports
 import glob
+import time
 import typing
 
 import translate
@@ -131,10 +132,13 @@ async def on_message(interaction):
 
 @tree.command(name="selfpurge")
 async def selfpurge(message: discord.Interaction):
+    message.response.send_message(">Deletando minhas últimas mensagens.", ephemeral=True)
     history = message.channel.history(limit=1000)
     async for msg in history:
         if msg.author == client.user:
             await msg.delete()
+            time.sleep(1)
+
 
 @tree.command(name="collect")
 async def collect(message: discord.Interaction):
