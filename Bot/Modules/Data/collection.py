@@ -51,6 +51,9 @@ def create_or_update_user_profile(user_data: dict):
 import logging
 import statistics
 
+import logging
+import statistics
+
 
 def create_or_update_message_details(message_details: dict):
     logging.info(f"[Processing message from user at Guild: {message_details['guild_id']}]")
@@ -79,31 +82,39 @@ def create_or_update_message_details(message_details: dict):
                 Profiles.userid == message_details['user_id']
             ).execute()
 
-            message_record, created = Messages.get_or_create(
-                message_id=message_id,
-                user=user_profile,
-                defaults={
-                    'message_text': message_text,
-                    'sentiment_score': sentiment_score,
-                    'subjectivity': subjectivity,
-                    'timestamp': timestamp,
-                    'channel_id': channel_id,
-                    'guild_id': guild_id
-                }
-            )
+            message_record = Messages.get_or_none(message_id=message_id)
 
-            if not created:
+            if message_record:
+                # If the message exists, update it
                 message_record.message_text = message_text
                 message_record.sentiment_score = sentiment_score
                 message_record.subjectivity = subjectivity
+                message_record.timestamp = timestamp
+                message_record.channel_id = channel_id
+                message_record.guild_id = guild_id
                 message_record.save()
                 logging.info(f"Updated message for user {user_profile.userid}.")
             else:
+                # If the message doesn't exist, create a new record
+                message_record = Messages.create(
+                    message_id=message_id,
+                    user=user_profile,
+                    message_text=message_text,
+                    sentiment_score=sentiment_score,
+                    subjectivity=subjectivity,
+                    timestamp=timestamp,
+                    channel_id=channel_id,
+                    guild_id=guild_id
+                )
                 logging.info(f"Created new message for user {user_profile.userid}.")
 
+            # Save or update the topic
             topic_record, created = MessageTopics.get_or_create(
-                message=message_record,
-                defaults={'topic_name': topic}
+                message=message_record,  # This links to the Messages model via the ForeignKeyField
+                defaults={
+                    'topic_name': topic,
+                    'message_id': message_id  # Save message_id in MessageTopics
+                }
             )
 
             if not created:
@@ -112,6 +123,7 @@ def create_or_update_message_details(message_details: dict):
                 logging.info(f"Updated topic for message {message_record.message_id}.")
             else:
                 logging.info(f"Created new topic for message {message_record.message_id}.")
+
 
     except Exception as e:
         logging.error(f"Error while creating/updating message record: {e}")

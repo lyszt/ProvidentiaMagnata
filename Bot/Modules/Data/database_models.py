@@ -6,54 +6,55 @@ db = SqliteDatabase("C:\\Users\\neoka\PycharmProjects\ProvidentiaMagnata\Bot\Dat
 # USER PROFILING
 
 class Profiles(Model):
-    username = CharField(unique=True)  # Discord username (e.g., 'username#1234')
-    userid = CharField(unique=True)  # Unique Discord user ID
-    discriminator = CharField()  # The 4-digit discriminator (e.g., '1234')
-    avatar_url = CharField(null=True)  # Avatar URL (if available)
-    status = CharField(default="offline")  # User's current status: 'online', 'offline', 'idle', 'dnd'
-    last_seen = DateTimeField(null=True)  # Timestamp of the last time the user interacted
-    joined_at = DateTimeField(null=True)  # Timestamp of when the user joined
-    is_bot = BooleanField(default=False)  # Whether the user is a bot
-    bio = TextField(null=True)  # Optional user bio or interests
-    sentiment_score = IntegerField(default=0)  # Overall sentiment score for the user
-    threat_level = IntegerField(default=0)  # Threat level for banning purposes
-    last_interaction = DateTimeField(null=True)  # Last time the user interacted
-    created_at = DateTimeField()  # When the profile was created
+    username = CharField(unique=True)
+    userid = CharField(unique=True)
+    discriminator = CharField()
+    avatar_url = CharField(null=True)
+    status = CharField(default="offline")
+    last_seen = DateTimeField(null=True)
+    joined_at = DateTimeField(null=True)
+    is_bot = BooleanField(default=False)
+    bio = TextField(null=True)
+    sentiment_score = IntegerField(default=0)
+    threat_level = IntegerField(default=0)
+    last_interaction = DateTimeField(null=True)
+    created_at = DateTimeField()
 
     class Meta:
         database = db
 
 
 class Messages(Model):
-    user = ForeignKeyField(Profiles, backref='messages')  # Link to the Profiles table
-    message_text = TextField()  # The content of the message
-    message_id = CharField(null=True)
-    timestamp = DateTimeField()  # Timestamp of when the message was sent
-    sentiment_score = FloatField(null=True)  # Sentiment score for the message
-    subjectivity = FloatField(null=True)  # Sentiment score for the message
-    message_type = CharField(default='text')  # Type of message (e.g., text, image, link)
-    channel_id = CharField(null=True)  # The channel the message was sent in (optional)
-    guild_id = CharField(null=True)  # The channel the message was sent in (optional)
+    user = ForeignKeyField(Profiles, backref='messages')  # Links to Profiles
+    message_id = CharField(unique=True)  # Unique Discord message ID
+    message_text = TextField()
+    timestamp = DateTimeField()
+    sentiment_score = FloatField(null=True)
+    subjectivity = FloatField(null=True)
+    message_type = CharField(default='text')
+    channel_id = CharField(null=True)
+    guild_id = CharField(null=True)
 
     class Meta:
-        database = db  # Specify the database connection to use
+        database = db
+
 
 class MessageTopics(Model):
-    message = ForeignKeyField(Messages, backref='topics')
-    message_id = CharField(null=True)
-    topic_name = CharField()  # Topic, e.g., 'music', 'gaming', 'tech', etc.
+    message = ForeignKeyField(Messages, backref='topics')  # Link to Messages
+    topic_name = CharField(null=True)  # Topic name (e.g., 'music', 'gaming')
 
     class Meta:
-        database = db  # Specify the database connection to use
+        database = db
+
 
 class UserActivity(Model):
     user = ForeignKeyField(Profiles, backref='activities')
-    activity_type = CharField()  # e.g., 'sent_message', 'liked_message', etc.
-    count = IntegerField(default=0)  # Count of occurrences of this activity type
+    activity_type = CharField()  # Type of activity (e.g., 'sent_message', etc.)
+    count = IntegerField(default=0)
     timestamp = DateTimeField()
-    class Meta:
-        database = db  # Specify the database connection to use
 
+    class Meta:
+        database = db
 
 class UserPreferences(Model):
     user = ForeignKeyField(Profiles, backref='preferences')
