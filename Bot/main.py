@@ -129,11 +129,18 @@ async def on_message(interaction):
 
         create_or_update_message_details(message_details)
 
+@tree.command(name="selfpurge")
+async def selfpurge(message: discord.Interaction):
+    history = message.channel.history(limit=1000)
+    async for msg in history:
+        if msg.author == client.user:
+            await msg.delete()
+
 @tree.command(name="collect")
 async def collect(message: discord.Interaction):
     if message.user.id == 1047943536374464583:
         await message.response.send_message("> Entendido. Colectando informações forçadamente.")
-        history = message.channel.history(limit=10)
+        history = message.channel.history(limit=100)
         async for interaction in history:
             author = await client.fetch_user(interaction.author.id)
             translator = translate.Translator(from_lang='pt', to_lang="en")
