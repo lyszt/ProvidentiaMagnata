@@ -135,23 +135,25 @@ async def collect(message: discord.Interaction):
         await message.response.send_message("> Entendido. Colectando informações forçadamente.")
         history = message.channel.history(limit=10)
         async for interaction in history:
+            author = client.fetch_user(interaction.author.id)
             translator = translate.Translator(from_lang='pt', to_lang="en")
             message_text = translator.translate(interaction.content)
 
             user_profile = Profiles.get_or_none(userid=interaction.author.id)
             # Extract relevant user detailsS
             user_details = {
-                'user_id': str(interaction.author.id),  # Unique Discord user ID
-                'username': interaction.author.name,  # Discord username (e.g., 'username')
-                'discriminator': interaction.author.discriminator,  # 4-digit discriminator (e.g., '1234')
-                'avatar_url': str(interaction.author.avatar) if interaction.author.avatar else None,
+                'user_id': str(author.id),  # Unique Discord user ID
+                'username': author.name,  # Discord username (e.g., 'username')
+                'discriminator': author.discriminator,  # 4-digit discriminator (e.g., '1234')
+                'avatar_url': str(author.avatar) if interaction.author.avatar else None,
                 # Avatar URL (if available)
-                'last_seen': interaction.author.activity.start if interaction.author.activity else None,
+                'user_status': 'offline',  # User's current status: 'online', 'offline', 'idle', 'dnd'
+                'last_seen': interaction.created_at,
                 'timestamp': interaction.created_at,
                 # Last activity timestamp, if any
-                'joined_at': interaction.author.joined_at,  # Timestamp of when the user joined
-                'is_bot': interaction.author.bot,  # Whether the user is a bot
-                'bio': None  # No bio data is directly available from Discord API
+                'joined_at': author.created_at,  # Timestamp of when the user joined
+                'is_bot': author.bot,  # Whether the user is a bot
+                'bio': f'{author.display_name}. Is this a character? Find the reference.' # No bio data is directly available from Discord API
             }
             create_or_update_user_profile(user_details)
             message_analysis = analyse_message(message_text)
