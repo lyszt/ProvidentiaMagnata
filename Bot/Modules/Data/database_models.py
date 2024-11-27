@@ -27,6 +27,7 @@ class Profiles(Model):
 class Messages(Model):
     user = ForeignKeyField(Profiles, backref='messages')  # Link to the Profiles table
     message_text = TextField()  # The content of the message
+    message_id = CharField(null=True)
     timestamp = DateTimeField()  # Timestamp of when the message was sent
     sentiment_score = FloatField(null=True)  # Sentiment score for the message
     subjectivity = FloatField(null=True)  # Sentiment score for the message
@@ -39,6 +40,7 @@ class Messages(Model):
 
 class MessageTopics(Model):
     message = ForeignKeyField(Messages, backref='topics')
+    message_id = CharField(null=True)
     topic_name = CharField()  # Topic, e.g., 'music', 'gaming', 'tech', etc.
 
     class Meta:

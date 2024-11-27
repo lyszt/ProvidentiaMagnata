@@ -45,14 +45,17 @@ async def on_ready():
     logging.info("Synced.")
 
     async def create_presence():
-        last_message = Messages.select().order_by(Messages.timestamp.desc()).limit(1).get()
-        target_channel = client.get_channel(int(last_message.channel_id))
-        history = target_channel.history(limit=20)
-        conversational_context = ""
-        async for msg in history:
-            conversational_context += f"{msg.author.name} diz: {msg.content}\n"
-        presence_status = Language().genPresence(conversational_context).split('.')[0] + '.'
-        logging.info(presence_status)
+        try:
+            last_message = Messages.select().order_by(Messages.timestamp.desc()).limit(1).get()
+            target_channel = client.get_channel(int(last_message.channel_id))
+            history = target_channel.history(limit=20)
+            conversational_context = ""
+            async for msg in history:
+                conversational_context += f"{msg.author.name} diz: {msg.content}\n"
+            presence_status = Language().genPresence(conversational_context).split('.')[0] + '.'
+            logging.info(presence_status)
+        except:
+            presence_status = "As palavras-chave da economia violenta são urbanização, industrialização, centralização, eficiência, quantidade, velocidade."
         try:
             await client.change_presence(
                 status=discord.Status.dnd,
@@ -80,9 +83,9 @@ async def on_message(interaction):
         return
     if(interaction.author.bot):
         return
-    # Lygon e Grão-Ducado Czéliano
-    #Make a list here instead of this huge or line
-    if interaction.guild.id == 704066892972949504 or interaction.guild.id == 696830110493573190 or interaction.guild.id == 413061666796732430:
+    # Lygon, ITB e Grão-Ducado Czéliano
+    approved_servers = [413061666796732428,704066892972949504,696830110493573190]
+    if interaction.guild.id in approved_servers:
         translator = translate.Translator(from_lang='pt', to_lang="en")
         message_text = translator.translate(interaction.content)
 
@@ -163,6 +166,7 @@ async def whois(interaction: discord.Interaction, target: discord.Member):
         'favorite_topic': preferred_topics,
         'google_info': results
     }
+    logging.info(context)
     response = Language().defineUser(context)
     embed = whois_embed(target.name, response, target.avatar)
     await interaction.edit_original_response(embed=embed)

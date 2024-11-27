@@ -1,10 +1,11 @@
 import logging
 
+import peewee
 import requests
 from bs4 import BeautifulSoup
 # App imports
 import discord
-from nltk import FreqDist
+from collections import Counter
 from peewee import DoesNotExist
 
 from Bot.Modules.Data.database_models import Profiles
@@ -24,7 +25,6 @@ def bing_search(target):
     results = []
 
     for item in soup.find_all("li", {"class": "b_algo"}):
-        link = item.find("a")["href"]
         snippet = item.find("p")  # Bing typically places the description in a <p> tag
 
         if snippet:
@@ -37,29 +37,41 @@ def bing_search(target):
 
 def get_from_database(user: discord.Member) -> dict:
     try:
-        user = Profiles.get(Profiles.userid == user.id)
-    except DoesNotExist:
-        logging.info("User does not have a profile in database.")
-        return {}
+        # Try to fetch the user profile
+        user_profile = Profiles.get(Profiles.userid == user.id)
+        sentiment = user_profile.sentiment_score
+    except peewee.DoesNotExist:
+        logging.info('User profile not found in database.')
+        sentiment = None
 
-    messages = Messages.select().where(Messages.user_id == user.id).execute()
+    try:
+        # Try to fetch user messages
+        messages = Messages.select().where(Messages.user_id == user_profile.id)
+        messages = [message.message_text for message in messages]
+    except peewee.DoesNotExist:
+        logging.info('No messages found for the user.')
+        messages = []
 
+    try:
+        # Try to fetch and process topics
+        topic_query = (
+            MessageTopics
+            .select(MessageTopics.topic_name)
+            .join(Messages, on=(MessageTopics.message == Messages.id))
+            .where(Messages.user == user.id)
+        )
+        topics = [topic.topic_name for topic in topic_query]
+        topic_distribution = Counter(topics)
+        preferred_topics = topic_distribution.most_common(1)[0][0] if topic_distribution.most_common(1) else None
+    except peewee.DoesNotExist:
+        logging.info('No topics found for the user.')
+        topics = []
+        preferred_topics = []
 
-    sentiment = user.sentiment_score
-    topic_query = (
-        MessageTopics
-        .select(MessageTopics.topic_name)
-        .join(Messages, on=(MessageTopics.message_id == Messages.id))
-        .where(Messages.user_id == user.id)
-    )
-
-    topics = [topic for topic in topic_query]
-    topic_distribution = FreqDist(topics)
-    preferred_topics = topic_distribution.most_common()
-    messages = [message.message_text for message in messages]
     return {
-        'messages': messages,
-        'topics': topics,
-        'preferred_topics': preferred_topics,
-        'sentiment': sentiment
+        'messages': messages if messages else 'No messages available',
+        'amount of messages': len(messages) if messages else 'No message counted.',
+        'topics': len(topics) if topics else 'No topics available',
+        'preferred_topics': preferred_topics if preferred_topics else 'No preferred topics available',
+        'sentiment': sentiment if sentiment is not None else 'Sentiment data unavailable'
     }

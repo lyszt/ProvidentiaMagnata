@@ -48,17 +48,18 @@ def create_or_update_user_profile(user_data: dict):
         user_profile.save()
 
 
-def create_or_update_message_details(message_details: dict):
-    logging.info(f"[ Processing message from user at Guild: {message_details['guild_id']} ]")
+import logging
+import statistics
 
-    # Ensure the user profile exists
+
+def create_or_update_message_details(message_details: dict):
+    logging.info(f"[Processing message from user at Guild: {message_details['guild_id']}]")
+
     user_profile = Profiles.get_or_none(userid=message_details['user_id'])
     if not user_profile:
         logging.error(f"User profile not found for ID: {message_details.get('user_id')}")
         return
 
-
-    # Unpack message details
     message_text = message_details.get('message_text')
     sentiment_score = message_details.get('sentiment_score')
     subjectivity = message_details.get('subjectivity')
@@ -68,53 +69,50 @@ def create_or_update_message_details(message_details: dict):
     topic = message_details.get('topic')
     message_id = message_details.get('message_id')
 
-    # Create or update message
     try:
         with db.atomic():
-            past_messages = (
-                Messages
-                .select()
-                .where(Messages.user == user_profile)
-            )
+            past_messages = Messages.select().where(Messages.user == user_profile)
             sentiments = [message.sentiment_score for message in past_messages]
             average_sentiment = statistics.mean(sentiments) if sentiments else 0
+
             Profiles.update({Profiles.sentiment_score: average_sentiment}).where(
                 Profiles.userid == message_details['user_id']
             ).execute()
 
             message_record, created = Messages.get_or_create(
-                timestamp=timestamp,
+                message_id=message_id,
                 user=user_profile,
-                channel_id=channel_id,
-                guild_id=guild_id,
                 defaults={
                     'message_text': message_text,
                     'sentiment_score': sentiment_score,
                     'subjectivity': subjectivity,
+                    'timestamp': timestamp,
+                    'channel_id': channel_id,
+                    'guild_id': guild_id
                 }
             )
+
             if not created:
                 message_record.message_text = message_text
                 message_record.sentiment_score = sentiment_score
                 message_record.subjectivity = subjectivity
                 message_record.save()
-                logging.info(f"Updated message for user.")
+                logging.info(f"Updated message for user {user_profile.userid}.")
             else:
-                logging.info(f"Created new message for user.")
+                logging.info(f"Created new message for user {user_profile.userid}.")
 
             topic_record, created = MessageTopics.get_or_create(
                 message=message_record,
-                defaults={
-                    'topic_name': f"{topic}",
-                    'message_id': message_id,
-                }
+                defaults={'topic_name': topic}
             )
+
             if not created:
-                topic_record.message_id = message_id
+                topic_record.topic_name = topic
                 topic_record.save()
-                logging.info(f"Updated topic for message.")
+                logging.info(f"Updated topic for message {message_record.message_id}.")
             else:
-                logging.info(f"Created message topic for analysis.")
+                logging.info(f"Created new topic for message {message_record.message_id}.")
+
     except Exception as e:
         logging.error(f"Error while creating/updating message record: {e}")
 
