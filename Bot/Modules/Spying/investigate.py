@@ -52,7 +52,7 @@ def get_from_database(user: discord.Member) -> dict:
         # Try to fetch user messages
         messages = Messages.select().where(Messages.user_id == user_profile.id)
         messages = [message.message_text for message in messages]
-    except peewee.DoesNotExist:
+    except peewee.DoesNotExist or UnboundLocalError:
         logging.info('No messages found for the user.')
         messages = []
 

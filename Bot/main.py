@@ -97,7 +97,6 @@ async def on_message(interaction):
             'discriminator': interaction.author.discriminator,  # 4-digit discriminator (e.g., '1234')
             'avatar_url': str(interaction.author.avatar) if interaction.author.avatar else None,
             # Avatar URL (if available)
-            'user_status': str(interaction.author.status),  # User's current status: 'online', 'offline', 'idle', 'dnd'
             'last_seen': interaction.author.activity.start if interaction.author.activity else None,
             'timestamp': interaction.created_at,
             # Last activity timestamp, if any
@@ -108,7 +107,7 @@ async def on_message(interaction):
         create_or_update_user_profile(user_details)
         message_analysis = analyse_message(message_text)
         # 10 messages per context for topic analysis
-        history = interaction.channel.history(limit=5)
+        history = interaction.channel.history(limit=10)
         conversational_context = "" + f"{interaction.author.name} diz: {interaction.content}"
         async for msg in history:
             conversational_context += f"{msg.author.name} diz: {msg.content}\n"
@@ -129,6 +128,55 @@ async def on_message(interaction):
         }
 
         create_or_update_message_details(message_details)
+
+@tree.command(name="collect")
+async def collect(message: discord.Interaction):
+    if message.user.id == 1047943536374464583:
+        await message.response.send_message("> Entendido. Colectando informações forçadamente.")
+        history = message.channel.history(limit=10)
+        async for interaction in history:
+            translator = translate.Translator(from_lang='pt', to_lang="en")
+            message_text = translator.translate(interaction.content)
+
+            user_profile = Profiles.get_or_none(userid=interaction.author.id)
+            # Extract relevant user detailsS
+            user_details = {
+                'user_id': str(interaction.author.id),  # Unique Discord user ID
+                'username': interaction.author.name,  # Discord username (e.g., 'username')
+                'discriminator': interaction.author.discriminator,  # 4-digit discriminator (e.g., '1234')
+                'avatar_url': str(interaction.author.avatar) if interaction.author.avatar else None,
+                # Avatar URL (if available)
+                'last_seen': interaction.author.activity.start if interaction.author.activity else None,
+                'timestamp': interaction.created_at,
+                # Last activity timestamp, if any
+                'joined_at': interaction.author.joined_at,  # Timestamp of when the user joined
+                'is_bot': interaction.author.bot,  # Whether the user is a bot
+                'bio': None  # No bio data is directly available from Discord API
+            }
+            create_or_update_user_profile(user_details)
+            message_analysis = analyse_message(message_text)
+            # 10 messages per context for topic analysis
+            history = interaction.channel.history(limit=10)
+            conversational_context = "" + f"{interaction.author.name} diz: {interaction.content}"
+            async for msg in history:
+                conversational_context += f"{msg.author.name} diz: {msg.content}\n"
+            topic = Language().findTopic(conversational_context)
+            sentiment_score = message_analysis['sentiment_score']
+            subjectivity = message_analysis['subjectivity']
+            message_details = {
+                'user': user_profile,
+                'user_id': str(interaction.author.id),
+                'message_text': interaction.content,
+                'sentiment_score': sentiment_score,
+                'subjectivity': subjectivity,
+                'timestamp': interaction.created_at,
+                'guild_id': interaction.guild.id,
+                'message_id': interaction.id,
+                'channel_id': interaction.channel.id,
+                'topic': topic,
+            }
+
+            create_or_update_message_details(message_details)
 
 @tree.command(name="ping")
 async def ping(message: discord.Interaction):
