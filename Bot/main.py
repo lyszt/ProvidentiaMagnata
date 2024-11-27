@@ -135,7 +135,7 @@ async def collect(message: discord.Interaction):
         await message.response.send_message("> Entendido. Colectando informações forçadamente.")
         history = message.channel.history(limit=10)
         async for interaction in history:
-            author = client.fetch_user(interaction.author.id)
+            author = await client.fetch_user(interaction.author.id)
             translator = translate.Translator(from_lang='pt', to_lang="en")
             message_text = translator.translate(interaction.content)
 
