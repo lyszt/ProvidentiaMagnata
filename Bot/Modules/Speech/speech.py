@@ -79,7 +79,7 @@ class Language:
 
     def defineUser(self, context: dict) -> str:
         completion = openai.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4-turbo",
             messages=[
                 {"role": "system",
                  "content": "Você é um sistema de vigilância. "

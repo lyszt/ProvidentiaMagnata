@@ -100,6 +100,7 @@ async def on_message(interaction):
             # Avatar URL (if available)
             'last_seen': interaction.author.activity.start if interaction.author.activity else None,
             'timestamp': interaction.created_at,
+            'user_status': interaction.author.status if interaction.author.status else 'offline',
             # Last activity timestamp, if any
             'joined_at': interaction.author.joined_at,  # Timestamp of when the user joined
             'is_bot': interaction.author.bot,  # Whether the user is a bot
@@ -142,8 +143,7 @@ async def selfpurge(message: discord.Interaction):
 @tree.command(name="collect")
 async def collect(message: discord.Interaction):
     if message.user.id == 1047943536374464583:
-        await message.response.send_message("> Entendido. Colectando informações forçadamente.")
-        history = message.channel.history(limit=100)
+        history = message.channel.history(limit=10)
         async for interaction in history:
             author = await client.fetch_user(interaction.author.id)
             translator = translate.Translator(from_lang='pt', to_lang="en")
