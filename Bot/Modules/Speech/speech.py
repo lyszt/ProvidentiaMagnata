@@ -84,8 +84,9 @@ class Language:
                 {"role": "system",
                  "content": "Você é um sistema de vigilância. "
                             "Descubra tudo o que puder sobre este alvo com base nas "
-                            "informações do banco de dados dele. Informe se ele é uma "
-                            "ameaça e o que ele gosta.",
+                            "informações do banco de dados dele. Descubra de onde vem seu nickname."
+                            " Informe se ele é uma "
+                            "ameaça e o que ele gosta. Seja lógico, investigativo e policial.",
                  },
                  {"role": "user",
                  "content": f"{context}"},

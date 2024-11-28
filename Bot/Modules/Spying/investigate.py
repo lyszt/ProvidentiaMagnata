@@ -39,6 +39,24 @@ def bing_search(target):
         results.append(description_text)
         return results
 
+
+def duckduckgo_search(target):
+    url = f"https://html.duckduckgo.com/html/?q=\"{target}\""
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
+    response = requests.get(url, headers=headers)
+    soup = BeautifulSoup(response.text, "html.parser")
+    results = []
+
+    for item in soup.find_all("a", {"class": "result__a"}):
+        title = item.get_text()
+        description = item.find_next_sibling("a", {"class": "result__snippet"})
+        description_text = description.get_text() if description else "No description available"
+        results.append(f"{title}: {description_text}")
+
+    return results
+
 def get_from_database(user: discord.Member) -> dict:
     try:
         # Try to fetch the user profile

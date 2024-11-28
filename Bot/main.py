@@ -22,7 +22,7 @@ from dotenv import load_dotenv
 from peewee import DoesNotExist
 
 from Bot.Modules.Speech.embeds import whois_embed
-from Bot.Modules.Spying.investigate import bing_search, get_from_database
+from Bot.Modules.Spying.investigate import bing_search, get_from_database, duckduckgo_search
 # Modules
 from Modules.configuration import *
 from Modules.Data.collection import *
@@ -61,9 +61,9 @@ async def on_ready():
             await client.change_presence(
                 status=discord.Status.dnd,
                 activity=discord.Activity(
-                    type=discord.ActivityType.watching,
-                    name=presence_status,
-                    url="https://www.youtube.com/watch?v=1DwmADdc8EE"
+                    type=discord.ActivityType.streaming,
+                    name=f": {presence_status}",
+                    url="https://www.youtube.com/watch?v=wATOtesXrqw"
                 )
             )
         except Exception as e:
@@ -207,7 +207,8 @@ async def contact(interaction: discord.Interaction, message_input: str, voice: t
 async def whois(interaction: discord.Interaction, target: discord.Member):
     await interaction.response.send_message(embed=default_embed("✨ Analisando...", "Aguarde enquanto verificamos a base de dados."))
 
-    results = bing_search(target.name)
+    bing_results = bing_search(target.name)
+    duckduckgo_results = duckduckgo_search(target.name)
     user_info = get_from_database(target)
     messages = user_info['messages']
     topics = user_info['topics']
@@ -224,7 +225,9 @@ async def whois(interaction: discord.Interaction, target: discord.Member):
         'is_bot': target.bot,
         'joined_at': target.joined_at.isoformat() if target.joined_at else None,
         'favorite_topic': preferred_topics,
-        'google_info': results
+        'bing_info': bing_results,
+        'duckduckgo_info': duckduckgo_results
+
     }
     logging.info(context)
     response = Language().defineUser(context)
