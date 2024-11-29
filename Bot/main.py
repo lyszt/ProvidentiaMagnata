@@ -130,7 +130,6 @@ async def on_message(interaction):
         }
 
         create_or_update_message_details(message_details)
-
 @tree.command(name="selfpurge")
 async def selfpurge(message: discord.Interaction):
     history = message.channel.history(limit=1000)
