@@ -41,6 +41,8 @@ tree = app_commands.CommandTree(client)
 @client.event
 async def on_ready():
     logging.info(f"Providence initialized at {datetime.now()}")
+    logging.info("Backing up previous databases.")
+    Initialize().backupData()
     await client.wait_until_ready()
     await tree.sync(guild=None)
     logging.info("Synced.")

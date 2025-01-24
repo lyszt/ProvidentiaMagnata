@@ -1,5 +1,8 @@
+import datetime
 import logging
 import os
+import shutil
+import pathlib
 import peewee
 import sqlite3
 import logging
@@ -14,6 +17,22 @@ class Initialize:
     def __init__(self):
         pass
 
+    def backupData(self):
+        DATADIR = pathlib.Path("../Bot/Data").resolve()
+        BACKUP = pathlib.Path("../Bot/Data/backup").resolve()
+        for filename in os.listdir(DATADIR):
+            file_path = os.path.join(DATADIR, filename)
+            if os.path.isdir(filename):
+                continue
+            try:
+                backup_filename = f"{filename}-{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
+                backup_path = os.path.join(BACKUP, backup_filename)
+                shutil.copy(file_path, backup_path)
+                logging.info(f"Backed up {filename}.")
+            except PermissionError:
+                logging.warning(f"Permission denied for {filename}.")
+            except Exception as err:
+                logging.error(f"Error backing up user info: {err}")
     # TEMPORARY FILES
     def makeLogs(self):
         LOG_FILE = 'providence.log'
