@@ -22,6 +22,9 @@ import matplotlib.pyplot as plt
 from IPython.display import Audio, display
 import tempfile
 
+from Bot.Modules.Spying.investigate import bing_search, duckduckgo_search
+
+
 class Language:
     def __init__(self):
         self.client = OpenAI()
@@ -53,6 +56,81 @@ class Language:
         )
 
         return completion.choices[0].message.content
+
+    def createCustomInstructions(self, context: str) -> str:
+        client = OpenAI()
+        completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """
+                        Think on how would be the best way to answer this question.**  
+                        
+                        1. **Question Deconstruction**:  
+                           - Extract the **core intent** (e.g., "Explain X," "Compare Y and Z," "Fix A").  
+                           - Identify **key terms** and **implicit needs** (e.g., brevity, technical depth).  
+                        
+                        2. **Response Blueprint**:  
+                           - **Structure**:  
+                             - **Opening**: Directly address the query (e.g., "The issue is caused by...").  
+                             - **Body**: Logical flow (cause → effect, problem → solution).  
+                             - **Closing**: Actionable next steps or summary.  
+                           - **Constraints**:  
+                             - Length (e.g., "Keep under 150 words").  
+                             - Format (e.g., bullets, paragraphs).  
+                        
+                        3. **Clarity Check**:  
+                           - Remove jargon unless technicality is required.  
+                           - Replace ambiguity with specificity (e.g., "many" → "72%").  
+                        
+                        4. **Tone Alignment**:  
+                           - **Formal**: Use for technical/strategic topics.  
+                           - **Neutral**: Default for most queries.  
+                           - **Simplified**: For non-expert audiences.  
+                        
+                        5. **Validation**:  
+                           - Ensure each sentence directly serves the query’s intent.  
+                           - Flag unresolved gaps (e.g., "Insufficient data on X; recommend further inquiry"). 
+                                            """
+                },
+                {
+                    "role": "user",
+                    "content": context  # Assuming conversation is a string variable with the user's input.
+                }
+            ]
+        )
+
+        return completion.choices[0].message.content
+
+    def findMeaning(self, context: str) -> str:
+        client = OpenAI()
+        completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """
+                        When the user asks a question, analyze the core topic of the conversation and convert it into a concise Google search query. Prioritize keywords and remove filler words.  
+                        Example:  
+                        - **User Input**: 'How do I fix a router that keeps disconnecting?'  
+                        - **Google Query**: 'router keeps disconnecting troubleshooting guide'  
+                        - **User Input**: 'What causes inflation in 2023?'  
+                        - **Google Query**: '2023 inflation causes economic analysis'  
+                        - **User Input**: 'Best budget laptops for gaming?'  
+                        - **Query**: 'best budget gaming laptops 2023 reviews'  
+                        Use modifiers like 'guide', 'tutorial', 'statistics', or 'recent' only if contextually relevant. Keep it under 10 words.
+                    """
+                },
+                {
+                    "role": "user",
+                    "content": context
+                }
+            ]
+        )
+
+        return completion.choices[0].message.content
+
 
     def genPresence(self, context: str) -> str:
         client = OpenAI()
@@ -101,6 +179,8 @@ class Conversation:
         await interaction.response.send_message(embed=default_embed
         ('✨ Pensando... ',
 'Providentia está analisando a sua mensagem. Aguarde.'))
+        google_context = Language().findMeaning(message_input)
+        context += f"Resultados no google para auxiliar a resposta: {bing_search(google_context)}, {duckduckgo_search(google_context)}"
         prompt = self.gen_text(message_input, context)
         if image_generation:
             pass # Deactivated for the moment
@@ -112,14 +192,13 @@ class Conversation:
 
 
     def gen_text(self, entry, context):
+        instructions = Language.createCustomInstructions(entry, context)
         completion = openai.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system",
                  "content": """
-                 lways respond in the user's input language. Follow these guidelines:  
-                            {  
-    "content": "Always respond in the user's input language. Follow these guidelines:  
+                            Always respond in the user's input language. Follow these guidelines:  
                             a) **Designation**: You are **Providentia Magnata**, an orbital defense and mass-disruption system. You serve *exclusively* under the **Emperor of Lygon**, addressed as 
                             *Your Imperial Majesty* or *Sire*. Use female pronouns for yourself.  
                             b) **Tone**: Blend unwavering authority with absolute subservience to the Emperor. 
@@ -137,7 +216,8 @@ class Conversation:
                  """
                  },
                 {"role": "user",
-                 "content": f"Respond to the emperor's demand '{entry}' per context: {context}. "
+                 "content": f"Respond to the emperor's demand '{entry}' per context: {context}."
+                            f"{instructions} "
                  }
             ]
         )

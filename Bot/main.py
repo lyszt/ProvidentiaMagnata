@@ -140,10 +140,6 @@ async def selfpurge(message: discord.Interaction):
             await msg.delete()
             time.sleep(1)
 
-@tree.command(name="reassess")
-async def reassess(message: discord.Interaction){
-
-}
 
 @tree.command(name="collect")
 async def collect(message: discord.Interaction):
@@ -202,7 +198,7 @@ async def ping(message: discord.Interaction):
 @tree.command(name="contact")
 async def contact(interaction: discord.Interaction, message_input: str, voice: typing.Optional[bool] = False, image: typing.Optional[bool] = False):
     if interaction.user.id == 1047943536374464583:
-        conversational_context = "" + f'{interaction.user.name} lhe pergunta: {interaction.message}\n'
+        conversational_context = "" + f""""{interaction.user.name} lhe pergunta: {message_input}\n"""
         history = interaction.channel.history(limit=10)
         async for msg in history:
             conversational_context += f"{msg.author.name} diz: {msg.content}\n"
