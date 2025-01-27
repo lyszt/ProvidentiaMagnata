@@ -140,6 +140,10 @@ async def selfpurge(message: discord.Interaction):
             await msg.delete()
             time.sleep(1)
 
+@tree.command(name="reassess")
+async def reassess(message: discord.Interaction){
+
+}
 
 @tree.command(name="collect")
 async def collect(message: discord.Interaction):
@@ -218,6 +222,7 @@ async def whois(interaction: discord.Interaction, target: discord.Member):
 
     context = {
         'target_name': target.display_name,
+        'target_username': target.name,
         'messages': messages,
         'amount of messages': len(messages),
         'amount of topics': len(topics),
