@@ -13,6 +13,10 @@
   <source src="Speech/presentation.mp3">
 </audio>
 
+
+https://github.com/user-attachments/assets/263d2865-7f49-4af7-bc48-240d036fc8a2
+
+
 ### Key Features
 
 - **Spy Mode**: Providentia functions as a data collection and surveillance tool across all servers, gathering metadata on user behavior. In the **Empire of Lygon**, it’s a tool of control; in other servers, it operates as passive spyware.
